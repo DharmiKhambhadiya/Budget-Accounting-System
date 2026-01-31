@@ -1,0 +1,54 @@
+[
+  {
+    "id": 1,
+    "invoiceNumber": "INV-2024-001",
+    "customerId": 3,
+    "salesOrderId": 1,
+    "invoiceDate": "2024-01-25",
+    "dueDate": "2024-02-24",
+    "totalAmount": 235410.00,
+    "paidAmount": 235410.00,
+    "remainingAmount": 0.00,
+    "analyticalAccountId": 4,
+    "status": "Paid"
+  },
+  {
+    "id": 2,
+    "invoiceNumber": "INV-2024-002",
+    "customerId": 4,
+    "salesOrderId": 2,
+    "invoiceDate": "2024-02-05",
+    "dueDate": "2024-03-07",
+    "totalAmount": 122720.00,
+    "paidAmount": 60000.00,
+    "remainingAmount": 62720.00,
+    "analyticalAccountId": 4,
+    "status": "Partially Paid"
+  },
+  {
+    "id": 3,
+    "invoiceNumber": "INV-2024-003",
+    "customerId": 6,
+    "salesOrderId": 3,
+    "invoiceDate": "2024-02-20",
+    "dueDate": "2024-03-22",
+    "totalAmount": 177000.00,
+    "paidAmount": 0.00,
+    "remainingAmount": 177000.00,
+    "analyticalAccountId": 4,
+    "status": "Not Paid"
+  },
+  {
+    "id": 4,
+    "invoiceNumber": "INV-2024-004",
+    "customerId": 3,
+    "salesOrderId": null,
+    "invoiceDate": "2024-02-25",
+    "dueDate": "2024-03-27",
+    "totalAmount": 85000.00,
+    "paidAmount": 0.00,
+    "remainingAmount": 85000.00,
+    "analyticalAccountId": 4,
+    "status": "Not Paid"
+  }
+]

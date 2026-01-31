@@ -1,0 +1,68 @@
+[
+  {
+    "id": 1,
+    "orderNumber": "PO-2024-001",
+    "vendorId": 1,
+    "orderDate": "2024-01-15",
+    "expectedDeliveryDate": "2024-02-01",
+    "items": [
+      {
+        "productId": 1,
+        "quantity": 20,
+        "unitPrice": 5500.00,
+        "taxRate": 18
+      },
+      {
+        "productId": 4,
+        "quantity": 10,
+        "unitPrice": 7500.00,
+        "taxRate": 18
+      }
+    ],
+    "subtotal": 185000.00,
+    "taxAmount": 33300.00,
+    "totalAmount": 218300.00,
+    "analyticalAccountId": 3,
+    "status": "Delivered"
+  },
+  {
+    "id": 2,
+    "orderNumber": "PO-2024-002",
+    "vendorId": 2,
+    "orderDate": "2024-01-20",
+    "expectedDeliveryDate": "2024-02-15",
+    "items": [
+      {
+        "productId": 2,
+        "quantity": 5,
+        "unitPrice": 15000.00,
+        "taxRate": 18
+      }
+    ],
+    "subtotal": 75000.00,
+    "taxAmount": 13500.00,
+    "totalAmount": 88500.00,
+    "analyticalAccountId": 3,
+    "status": "Pending"
+  },
+  {
+    "id": 3,
+    "orderNumber": "PO-2024-003",
+    "vendorId": 5,
+    "orderDate": "2024-02-01",
+    "expectedDeliveryDate": "2024-02-20",
+    "items": [
+      {
+        "productId": 3,
+        "quantity": 3,
+        "unitPrice": 45000.00,
+        "taxRate": 18
+      }
+    ],
+    "subtotal": 135000.00,
+    "taxAmount": 24300.00,
+    "totalAmount": 159300.00,
+    "analyticalAccountId": 3,
+    "status": "In Transit"
+  }
+]

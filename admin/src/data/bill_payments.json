@@ -1,0 +1,35 @@
+[
+  {
+    "id": 1,
+    "paymentNumber": "BP-2024-001",
+    "vendorBillId": 1,
+    "paymentDate": "2024-02-15",
+    "paymentMethod": "Bank Transfer",
+    "amount": 218300.00,
+    "referenceNumber": "TXN-20240215-001",
+    "analyticalAccountId": 3,
+    "status": "Completed"
+  },
+  {
+    "id": 2,
+    "paymentNumber": "BP-2024-002",
+    "vendorBillId": 2,
+    "paymentDate": "2024-02-20",
+    "paymentMethod": "Cheque",
+    "amount": 40000.00,
+    "referenceNumber": "CHQ-20240220-001",
+    "analyticalAccountId": 3,
+    "status": "Completed"
+  },
+  {
+    "id": 3,
+    "paymentNumber": "BP-2024-003",
+    "vendorBillId": 2,
+    "paymentDate": "2024-03-01",
+    "paymentMethod": "Bank Transfer",
+    "amount": 48500.00,
+    "referenceNumber": "TXN-20240301-001",
+    "analyticalAccountId": 3,
+    "status": "Pending"
+  }
+]

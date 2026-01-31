@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "name": "ABC Suppliers Ltd",
+    "contactType": "Vendor",
+    "email": "contact@abcsuppliers.com",
+    "phone": "+91-9876543210",
+    "address": "123 Industrial Area, Mumbai, Maharashtra 400001"
+  },
+  {
+    "id": 2,
+    "name": "XYZ Trading Co",
+    "contactType": "Vendor",
+    "email": "info@xyztrading.com",
+    "phone": "+91-9876543211",
+    "address": "456 Business Park, Delhi, Delhi 110001"
+  },
+  {
+    "id": 3,
+    "name": "Premium Furniture Store",
+    "contactType": "Customer",
+    "email": "orders@premiumfurniture.com",
+    "phone": "+91-9876543212",
+    "address": "789 Commercial Street, Bangalore, Karnataka 560001"
+  },
+  {
+    "id": 4,
+    "name": "Home Decor Solutions",
+    "contactType": "Customer",
+    "email": "sales@homedecor.com",
+    "phone": "+91-9876543213",
+    "address": "321 Retail Hub, Pune, Maharashtra 411001"
+  },
+  {
+    "id": 5,
+    "name": "Wood Craft Industries",
+    "contactType": "Vendor",
+    "email": "sales@woodcraft.com",
+    "phone": "+91-9876543214",
+    "address": "654 Manufacturing Zone, Chennai, Tamil Nadu 600001"
+  },
+  {
+    "id": 6,
+    "name": "Modern Living Stores",
+    "contactType": "Customer",
+    "email": "contact@modernliving.com",
+    "phone": "+91-9876543215",
+    "address": "987 Shopping Complex, Hyderabad, Telangana 500001"
+  }
+]

@@ -1,0 +1,40 @@
+[
+  {
+    "id": 1,
+    "ruleType": "Vendor Based",
+    "conditions": {
+      "vendorId": 1,
+      "keywords": ["supplies", "materials"]
+    },
+    "analyticalAccountId": 3,
+    "priority": 1
+  },
+  {
+    "id": 2,
+    "ruleType": "Product Based",
+    "conditions": {
+      "productId": 1,
+      "minAmount": 50000
+    },
+    "analyticalAccountId": 2,
+    "priority": 2
+  },
+  {
+    "id": 3,
+    "ruleType": "Keyword Based",
+    "conditions": {
+      "keywords": ["marketing", "advertising", "promotion"]
+    },
+    "analyticalAccountId": 1,
+    "priority": 3
+  },
+  {
+    "id": 4,
+    "ruleType": "Amount Based",
+    "conditions": {
+      "minAmount": 100000
+    },
+    "analyticalAccountId": 5,
+    "priority": 4
+  }
+]

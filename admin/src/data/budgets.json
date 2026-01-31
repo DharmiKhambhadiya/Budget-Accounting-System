@@ -1,0 +1,52 @@
+[
+  {
+    "id": 1,
+    "name": "Q1 2024 Marketing Budget",
+    "analyticalAccountId": 1,
+    "period_startDate": "2024-01-01",
+    "period_endDate": "2024-03-31",
+    "amount": 500000.00,
+    "spentAmount": 325000.00,
+    "remainingAmount": 175000.00
+  },
+  {
+    "id": 2,
+    "name": "Q1 2024 Operations Budget",
+    "analyticalAccountId": 2,
+    "period_startDate": "2024-01-01",
+    "period_endDate": "2024-03-31",
+    "amount": 800000.00,
+    "spentAmount": 650000.00,
+    "remainingAmount": 150000.00
+  },
+  {
+    "id": 3,
+    "name": "Q1 2024 Raw Materials Budget",
+    "analyticalAccountId": 3,
+    "period_startDate": "2024-01-01",
+    "period_endDate": "2024-03-31",
+    "amount": 2000000.00,
+    "spentAmount": 1850000.00,
+    "remainingAmount": 150000.00
+  },
+  {
+    "id": 4,
+    "name": "Q1 2024 Sales Budget",
+    "analyticalAccountId": 4,
+    "period_startDate": "2024-01-01",
+    "period_endDate": "2024-03-31",
+    "amount": 600000.00,
+    "spentAmount": 420000.00,
+    "remainingAmount": 180000.00
+  },
+  {
+    "id": 5,
+    "name": "Q1 2024 Administration Budget",
+    "analyticalAccountId": 5,
+    "period_startDate": "2024-01-01",
+    "period_endDate": "2024-03-31",
+    "amount": 400000.00,
+    "spentAmount": 280000.00,
+    "remainingAmount": 120000.00
+  }
+]

@@ -1,0 +1,34 @@
+[
+  {
+    "id": 1,
+    "name": "Admin User",
+    "loginId": "admin",
+    "email": "admin@shivfurniture.com",
+    "role": "Vendor",
+    "isActive": true
+  },
+  {
+    "id": 2,
+    "name": "Finance Manager",
+    "loginId": "finance_mgr",
+    "email": "finance@shivfurniture.com",
+    "role": "Customer",
+    "isActive": true
+  },
+  {
+    "id": 3,
+    "name": "Accountant",
+    "loginId": "accountant",
+    "email": "accountant@shivfurniture.com",
+    "role": "Customer",
+    "isActive": true
+  },
+  {
+    "id": 4,
+    "name": "Data Entry",
+    "loginId": "data_entry",
+    "email": "dataentry@shivfurniture.com",
+    "role": "Vendor",
+    "isActive": false
+  }
+]

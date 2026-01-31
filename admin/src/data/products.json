@@ -1,0 +1,74 @@
+[
+  {
+    "id": 1,
+    "name": "Executive Office Chair",
+    "category": "Furniture",
+    "unit": "Piece",
+    "salePrice": 8500.00,
+    "purchasePrice": 5500.00,
+    "stockQuantity": 45
+  },
+  {
+    "id": 2,
+    "name": "Wooden Dining Table",
+    "category": "Furniture",
+    "unit": "Piece",
+    "salePrice": 25000.00,
+    "purchasePrice": 15000.00,
+    "stockQuantity": 12
+  },
+  {
+    "id": 3,
+    "name": "Leather Sofa Set",
+    "category": "Furniture",
+    "unit": "Set",
+    "salePrice": 75000.00,
+    "purchasePrice": 45000.00,
+    "stockQuantity": 8
+  },
+  {
+    "id": 4,
+    "name": "Office Desk",
+    "category": "Furniture",
+    "unit": "Piece",
+    "salePrice": 12000.00,
+    "purchasePrice": 7500.00,
+    "stockQuantity": 25
+  },
+  {
+    "id": 5,
+    "name": "Bed Frame - Queen Size",
+    "category": "Furniture",
+    "unit": "Piece",
+    "salePrice": 18000.00,
+    "purchasePrice": 11000.00,
+    "stockQuantity": 15
+  },
+  {
+    "id": 6,
+    "name": "Wardrobe - 4 Door",
+    "category": "Furniture",
+    "unit": "Piece",
+    "salePrice": 35000.00,
+    "purchasePrice": 22000.00,
+    "stockQuantity": 10
+  },
+  {
+    "id": 7,
+    "name": "Coffee Table",
+    "category": "Furniture",
+    "unit": "Piece",
+    "salePrice": 6500.00,
+    "purchasePrice": 4000.00,
+    "stockQuantity": 30
+  },
+  {
+    "id": 8,
+    "name": "Bookshelf - 5 Tier",
+    "category": "Furniture",
+    "unit": "Piece",
+    "salePrice": 9500.00,
+    "purchasePrice": 6000.00,
+    "stockQuantity": 20
+  }
+]

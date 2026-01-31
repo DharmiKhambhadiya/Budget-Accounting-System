@@ -1,0 +1,40 @@
+.master-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.master-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.master-page-title {
+  margin: 0 0 8px 0;
+  font-size: 28px;
+  font-weight: 600;
+  color: #333;
+}
+
+.master-page-subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: #999;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px 8px;
+  text-decoration: underline;
+  margin-right: 12px;
+}
+
+.btn-link:hover {
+  color: #0056b3;
+}

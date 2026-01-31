@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "name": "Marketing & Advertising",
+    "description": "All marketing and advertising expenses",
+    "accountType": "Expense"
+  },
+  {
+    "id": 2,
+    "name": "Operations & Maintenance",
+    "description": "Day-to-day operations and maintenance costs",
+    "accountType": "Expense"
+  },
+  {
+    "id": 3,
+    "name": "Raw Materials",
+    "description": "Purchase of raw materials and supplies",
+    "accountType": "Expense"
+  },
+  {
+    "id": 4,
+    "name": "Sales & Distribution",
+    "description": "Sales team and distribution channel expenses",
+    "accountType": "Expense"
+  },
+  {
+    "id": 5,
+    "name": "Administration",
+    "description": "General administration and overhead costs",
+    "accountType": "Expense"
+  },
+  {
+    "id": 6,
+    "name": "Research & Development",
+    "description": "R&D activities and innovation expenses",
+    "accountType": "Expense"
+  }
+]
