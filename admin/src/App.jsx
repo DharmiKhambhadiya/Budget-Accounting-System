@@ -1,4 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import AdminLayout from './components/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
@@ -21,45 +23,59 @@ import './App.css';
 function App() {
   return (
     <Router>
-      <Routes>
-        {/* Public Route */}
-        <Route path="/login" element={<Login />} />
-        
-        {/* Protected Routes with Layout */}
-        <Route
-          element={
-            <ProtectedRoute>
-              <AdminLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<Dashboard />} />
+      <div className="min-h-screen bg-gray-50">
+        <Routes>
+          {/* Public Route */}
+          <Route path="/login" element={<Login />} />
           
-          {/* Master Data Routes */}
-          <Route path="master/users" element={<Users />} />
-          <Route path="master/contacts" element={<Contacts />} />
-          <Route path="master/products" element={<Products />} />
-          <Route path="master/analytical-accounts" element={<AnalyticalAccounts />} />
-          <Route path="master/budgets" element={<Budgets />} />
-          <Route path="master/auto-analytical-models" element={<AutoAnalyticalModels />} />
-          
-          {/* Transaction Routes */}
-          <Route path="transactions/purchase-orders" element={<PurchaseOrders />} />
-          <Route path="transactions/sales-orders" element={<SalesOrders />} />
-          <Route path="transactions/vendor-bills" element={<VendorBills />} />
-          <Route path="transactions/customer-invoices" element={<CustomerInvoices />} />
-          
-          {/* Payment Routes */}
-          <Route path="payments/bill-payments" element={<BillPayments />} />
-          <Route path="payments/invoice-payments" element={<InvoicePayments />} />
-          
-          {/* Reports Route */}
-          <Route path="reports" element={<Reports />} />
-          
-          {/* Catch all - redirect to dashboard */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Route>
-      </Routes>
+          {/* Protected Routes with Layout */}
+          <Route
+            element={
+              <ProtectedRoute>
+                <AdminLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Dashboard />} />
+            
+            {/* Master Data Routes */}
+            <Route path="master/users" element={<Users />} />
+            <Route path="master/contacts" element={<Contacts />} />
+            <Route path="master/products" element={<Products />} />
+            <Route path="master/analytical-accounts" element={<AnalyticalAccounts />} />
+            <Route path="master/budgets" element={<Budgets />} />
+            <Route path="master/auto-analytical-models" element={<AutoAnalyticalModels />} />
+            
+            {/* Transaction Routes */}
+            <Route path="transactions/purchase-orders" element={<PurchaseOrders />} />
+            <Route path="transactions/sales-orders" element={<SalesOrders />} />
+            <Route path="transactions/vendor-bills" element={<VendorBills />} />
+            <Route path="transactions/customer-invoices" element={<CustomerInvoices />} />
+            
+            {/* Payment Routes */}
+            <Route path="payments/bill-payments" element={<BillPayments />} />
+            <Route path="payments/invoice-payments" element={<InvoicePayments />} />
+            
+            {/* Reports Route */}
+            <Route path="reports" element={<Reports />} />
+            
+            {/* Catch all - redirect to dashboard */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Route>
+        </Routes>
+      </div>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </Router>
   );
 }

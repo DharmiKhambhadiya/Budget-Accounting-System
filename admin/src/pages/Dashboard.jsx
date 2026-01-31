@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { DollarSign, TrendingUp, Wallet, BarChart3 } from 'lucide-react';
 import SummaryCard from '../components/SummaryCard';
 import DataTable from '../components/DataTable';
 import StatusBadge from '../components/StatusBadge';
@@ -10,7 +11,6 @@ import {
   formatCurrency,
   formatDate
 } from '../utils/dataLoader';
-import './Dashboard.css';
 
 const Dashboard = () => {
   const budgets = getBudgets();
@@ -132,17 +132,18 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="dashboard">
-      <div className="dashboard-header">
-        <h1 className="dashboard-title">Dashboard</h1>
-        <p className="dashboard-subtitle">Budget Accounting System Overview</p>
+    <div className="flex flex-col gap-6">
+      <div className="mb-2">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
+        <p className="text-gray-600">Budget Accounting System Overview</p>
       </div>
 
-      <div className="dashboard-kpis">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <SummaryCard
           title="Total Budget"
           value={formatCurrency(kpis.totalBudget)}
           subtitle="All active budgets"
+          icon={Wallet}
         />
         <SummaryCard
           title="Actual Spent"
@@ -150,31 +151,34 @@ const Dashboard = () => {
           subtitle="Total vendor bills"
           trend="up"
           trendValue={`${((kpis.actualSpent / kpis.totalBudget) * 100).toFixed(1)}%`}
+          icon={DollarSign}
         />
         <SummaryCard
           title="Remaining Budget"
           value={formatCurrency(kpis.remainingBudget)}
           subtitle="Available balance"
+          icon={TrendingUp}
         />
         <SummaryCard
           title="Budget Utilization"
           value={`${kpis.utilization}%`}
           subtitle="Spent vs Budget"
+          icon={BarChart3}
         />
       </div>
 
-      <div className="dashboard-charts">
-        <div className="dashboard-chart-card">
-          <h3 className="chart-title">Budget vs Actual by Analytical Account</h3>
-          <div className="chart-placeholder">
-            <table className="budget-chart-table">
+      <div className="grid grid-cols-1 gap-6">
+        <div className="card">
+          <h3 className="text-xl font-semibold text-gray-900 mb-5">Budget vs Actual by Analytical Account</h3>
+          <div className="min-h-[200px]">
+            <table className="w-full border-collapse text-sm">
               <thead>
-                <tr>
-                  <th>Analytical Account</th>
-                  <th>Budget</th>
-                  <th>Spent</th>
-                  <th>Remaining</th>
-                  <th>% Used</th>
+                <tr className="bg-gray-50 border-b-2 border-gray-200">
+                  <th className="table-header">Analytical Account</th>
+                  <th className="table-header">Budget</th>
+                  <th className="table-header">Spent</th>
+                  <th className="table-header">Remaining</th>
+                  <th className="table-header">% Used</th>
                 </tr>
               </thead>
               <tbody>
@@ -183,18 +187,20 @@ const Dashboard = () => {
                     ? ((item.spentAmount / item.budgetAmount) * 100).toFixed(1) 
                     : 0;
                   return (
-                    <tr key={idx}>
-                      <td>{item.accountName}</td>
-                      <td>{formatCurrency(item.budgetAmount)}</td>
-                      <td>{formatCurrency(item.spentAmount)}</td>
-                      <td>{formatCurrency(item.remainingAmount)}</td>
-                      <td>
-                        <div className="progress-bar-container">
+                    <tr key={idx} className="table-row">
+                      <td className="table-cell">{item.accountName}</td>
+                      <td className="table-cell">{formatCurrency(item.budgetAmount)}</td>
+                      <td className="table-cell">{formatCurrency(item.spentAmount)}</td>
+                      <td className="table-cell">{formatCurrency(item.remainingAmount)}</td>
+                      <td className="table-cell">
+                        <div className="relative w-full h-6 bg-gray-200 rounded overflow-hidden">
                           <div 
-                            className="progress-bar"
+                            className="absolute left-0 top-0 h-full bg-blue-600 transition-all duration-300"
                             style={{ width: `${Math.min(percentUsed, 100)}%` }}
                           />
-                          <span className="progress-text">{percentUsed}%</span>
+                          <span className="relative z-10 block text-center leading-6 text-xs font-medium text-gray-900">
+                            {percentUsed}%
+                          </span>
                         </div>
                       </td>
                     </tr>
@@ -206,9 +212,9 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="dashboard-tables">
-        <div className="dashboard-table-card">
-          <h3 className="table-card-title">Recent Customer Invoices</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="card">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Customer Invoices</h3>
           <DataTable
             data={recentInvoices}
             columns={invoiceColumns}
@@ -217,8 +223,8 @@ const Dashboard = () => {
           />
         </div>
 
-        <div className="dashboard-table-card">
-          <h3 className="table-card-title">Pending Vendor Bills</h3>
+        <div className="card">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Pending Vendor Bills</h3>
           <DataTable
             data={pendingBills}
             columns={billColumns}
@@ -227,8 +233,8 @@ const Dashboard = () => {
           />
         </div>
 
-        <div className="dashboard-table-card">
-          <h3 className="table-card-title">Unpaid Invoices</h3>
+        <div className="card">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Unpaid Invoices</h3>
           <DataTable
             data={unpaidInvoices}
             columns={invoiceColumns}

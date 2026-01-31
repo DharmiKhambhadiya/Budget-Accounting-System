@@ -1,46 +1,46 @@
-import './StatusBadge.css';
-
 const StatusBadge = ({ status, type = 'default' }) => {
-  const getStatusClass = () => {
+  const getStatusClasses = () => {
     const statusLower = status?.toLowerCase() || '';
     
     if (type === 'payment') {
       if (statusLower.includes('paid') && !statusLower.includes('partially') && !statusLower.includes('not')) {
-        return 'status-paid';
+        return 'bg-green-100 text-green-700 border-green-200';
       } else if (statusLower.includes('partially')) {
-        return 'status-partial';
+        return 'bg-yellow-100 text-yellow-700 border-yellow-200';
       } else {
-        return 'status-unpaid';
+        return 'bg-red-100 text-red-700 border-red-200';
       }
     }
     
     if (type === 'order') {
-      if (statusLower === 'delivered') return 'status-success';
-      if (statusLower === 'pending') return 'status-warning';
-      if (statusLower === 'in transit') return 'status-info';
-      return 'status-default';
+      if (statusLower === 'delivered') return 'bg-green-100 text-green-700 border-green-200';
+      if (statusLower === 'pending') return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+      if (statusLower === 'in transit') return 'bg-blue-100 text-blue-700 border-blue-200';
+      return 'bg-gray-100 text-gray-700 border-gray-200';
     }
     
     if (type === 'active') {
-      return statusLower === 'true' || statusLower === true ? 'status-active' : 'status-inactive';
+      return statusLower === 'true' || statusLower === true 
+        ? 'bg-green-100 text-green-700 border-green-200'
+        : 'bg-gray-100 text-gray-700 border-gray-200';
     }
     
     // Default status mapping
     if (statusLower === 'completed' || statusLower === 'active' || statusLower === 'paid') {
-      return 'status-success';
+      return 'bg-green-100 text-green-700 border-green-200';
     }
     if (statusLower === 'pending' || statusLower === 'partially paid') {
-      return 'status-warning';
+      return 'bg-yellow-100 text-yellow-700 border-yellow-200';
     }
     if (statusLower === 'not paid' || statusLower === 'inactive') {
-      return 'status-danger';
+      return 'bg-red-100 text-red-700 border-red-200';
     }
     
-    return 'status-default';
+    return 'bg-gray-100 text-gray-700 border-gray-200';
   };
 
   return (
-    <span className={`status-badge ${getStatusClass()}`}>
+    <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-semibold border ${getStatusClasses()}`}>
       {status || 'N/A'}
     </span>
   );

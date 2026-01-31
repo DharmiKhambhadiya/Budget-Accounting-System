@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import './DataTable.css';
 import StatusBadge from './StatusBadge';
 
 const DataTable = ({ 
@@ -66,9 +65,9 @@ const DataTable = ({
   };
 
   return (
-    <div className="data-table-container">
+    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
       {searchable && (
-        <div className="data-table-search">
+        <div className="p-4 border-b border-gray-200 bg-gray-50">
           <input
             type="text"
             placeholder="Search..."
@@ -77,27 +76,27 @@ const DataTable = ({
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
-            className="data-table-search-input"
+            className="input-field max-w-md"
           />
         </div>
       )}
       
-      <div className="data-table-wrapper">
-        <table className="data-table">
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse text-sm">
           <thead>
-            <tr>
+            <tr className="bg-gray-50 border-b-2 border-gray-200">
               {columns.map((col, idx) => (
-                <th key={idx} style={{ width: col.width }}>
+                <th key={idx} className="table-header" style={{ width: col.width }}>
                   {col.header}
                 </th>
               ))}
-              {actions && <th style={{ width: '100px' }}>Actions</th>}
+              {actions && <th className="table-header" style={{ width: '100px' }}>Actions</th>}
             </tr>
           </thead>
           <tbody>
             {paginatedData.length === 0 ? (
               <tr>
-                <td colSpan={columns.length + (actions ? 1 : 0)} className="data-table-empty">
+                <td colSpan={columns.length + (actions ? 1 : 0)} className="px-6 py-12 text-center text-gray-500 italic">
                   No data found
                 </td>
               </tr>
@@ -106,15 +105,15 @@ const DataTable = ({
                 <tr 
                   key={row.id || rowIdx} 
                   onClick={() => onRowClick && onRowClick(row)}
-                  className={onRowClick ? 'data-table-row-clickable' : ''}
+                  className={`table-row ${onRowClick ? 'cursor-pointer' : ''}`}
                 >
                   {columns.map((col, colIdx) => (
-                    <td key={colIdx}>
+                    <td key={colIdx} className="table-cell">
                       {renderCell(row, col)}
                     </td>
                   ))}
                   {actions && (
-                    <td className="data-table-actions">
+                    <td className="table-cell text-right whitespace-nowrap">
                       {actions(row)}
                     </td>
                   )}
@@ -126,21 +125,21 @@ const DataTable = ({
       </div>
 
       {pagination && totalPages > 1 && (
-        <div className="data-table-pagination">
+        <div className="flex justify-between items-center p-4 border-t border-gray-200 bg-gray-50">
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className="data-table-pagination-btn"
+            className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Previous
           </button>
-          <span className="data-table-pagination-info">
+          <span className="text-sm text-gray-600">
             Page {currentPage} of {totalPages} ({filteredData.length} records)
           </span>
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="data-table-pagination-btn"
+            className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Next
           </button>

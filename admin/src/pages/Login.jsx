@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { getUsers } from '../utils/dataLoader';
-import './Login.css';
 
 const Login = () => {
   const [loginId, setLoginId] = useState('');
@@ -28,6 +28,7 @@ const Login = () => {
 
     if (!user) {
       setError('Invalid login ID or user is inactive');
+      toast.error('Invalid login ID or user is inactive');
       return;
     }
 
@@ -35,24 +36,25 @@ const Login = () => {
     localStorage.setItem('currentUser', JSON.stringify(user));
     localStorage.setItem('isAuthenticated', 'true');
     
+    toast.success('Logged in successfully');
     // Navigate to dashboard
     navigate('/');
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <div className="login-header">
-          <h1 className="login-logo">Shiv Furniture</h1>
-          <p className="login-subtitle">Budget Accounting System</p>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+      <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-10">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-blue-600 mb-2">Shiv Furniture</h1>
+          <p className="text-sm text-gray-500 uppercase tracking-wider">Budget Accounting System</p>
         </div>
         
-        <form onSubmit={handleSubmit} className="login-form">
-          <div className="form-group">
-            <label className="form-label">Login ID</label>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Login ID</label>
             <input
               type="text"
-              className="form-input"
+              className="input-field"
               value={loginId}
               onChange={(e) => setLoginId(e.target.value)}
               placeholder="Enter your login ID"
@@ -61,37 +63,37 @@ const Login = () => {
             />
           </div>
           
-          <div className="form-group">
-            <label className="form-label">Password</label>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
             <input
               type="password"
-              className="form-input"
+              className="input-field"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your password"
               required
             />
-            <small className="form-hint">
+            <small className="block mt-1.5 text-xs text-gray-500 italic">
               Demo: Use any login ID from users (e.g., admin, finance_mgr)
             </small>
           </div>
 
           {error && (
-            <div className="error-message">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm text-center">
               {error}
             </div>
           )}
 
-          <button type="submit" className="btn btn-primary btn-login">
+          <button type="submit" className="btn-primary w-full py-3 text-base font-semibold">
             Sign In
           </button>
         </form>
 
-        <div className="login-footer">
-          <p className="login-info">
-            <strong>Demo Accounts:</strong>
+        <div className="mt-8 pt-6 border-t border-gray-200 text-center">
+          <p className="text-xs text-gray-600 mb-3">
+            <strong className="text-gray-900">Demo Accounts:</strong>
           </p>
-          <ul className="demo-accounts">
+          <ul className="text-xs text-gray-600 space-y-1 font-mono">
             <li>admin (Administrator)</li>
             <li>finance_mgr (Finance Manager)</li>
             <li>accountant (Accountant)</li>
