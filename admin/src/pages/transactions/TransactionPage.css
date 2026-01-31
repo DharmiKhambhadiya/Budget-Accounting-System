@@ -178,3 +178,95 @@
   font-weight: 500;
   color: #666;
 }
+
+.po-modal {
+  display: flex;
+  flex-direction: column;
+  max-height: 80vh;
+}
+
+.po-modal-body {
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.po-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid #e5e7eb;
+  background: #fafafa;
+}
+
+.po-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.full-width {
+  grid-column: span 2;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group select {
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+}
+
+.po-view-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.po-view-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.po-summary {
+  margin-top: 20px;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 12px;
+}
+
+.po-summary div {
+  display: flex;
+  justify-content: space-between;
+}
+
+.po-summary .total {
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .po-form-grid,
+  .po-view-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .full-width {
+    grid-column: span 1;
+  }
+
+  .po-modal-footer {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}

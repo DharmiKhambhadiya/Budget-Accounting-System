@@ -1,0 +1,315 @@
+// Budget App - Database Schema for dbdiagram.io
+// Copy this entire file content and paste it in https://dbdiagram.io
+// The diagram will automatically render all tables and relationships
+
+Project budget_app {
+  database_type: 'MongoDB'
+  Note: 'Invoicing and Budget Management System - All collections and relationships'
+}
+
+// ============================================
+// USER MANAGEMENT
+// ============================================
+
+Table users {
+  _id ObjectId [pk]
+  name varchar [not null]
+  loginId varchar(12) [not null, unique, note: '6-12 characters']
+  email varchar [not null, unique]
+  password varchar [not null, note: 'hashed, min 8 chars']
+  role varchar [not null, note: 'user or admin']
+  isActive boolean [default: true]
+  createdAt datetime [default: `now()`]
+  updatedAt datetime [default: `now()`]
+  Note: 'User authentication and authorization'
+}
+
+// ============================================
+// MASTER DATA
+// ============================================
+
+Table contacts {
+  _id ObjectId [pk]
+  name varchar [not null]
+  contactType varchar [not null, note: 'vendor or customer']
+  addressLine1 varchar
+  addressLine2 varchar
+  email varchar
+  phone varchar
+  image varchar
+  tags array
+  createdBy ObjectId
+  createdAt datetime [default: `now()`]
+  updatedAt datetime [default: `now()`]
+  
+  Note: 'Vendors and Customers master data'
+}
+
+Table products {
+  _id ObjectId [pk]
+  name varchar [not null, unique]
+  description text
+  category varchar [note: 'Office Chairs, Dining Tables, Raw Timber']
+  unit varchar [not null, note: 'pcs, kg, liters']
+  salesPrice decimal [default: 0]
+  purchasePrice decimal [default: 0]
+  stockQuantity decimal [default: 0]
+  createdBy ObjectId
+  createdAt datetime [default: `now()`]
+  updatedAt datetime [default: `now()`]
+  
+  Note: 'Product/Inventory master data'
+}
+
+Table analytical_accounts {
+  _id ObjectId [pk]
+  name varchar [not null, unique, note: 'Showroom Rent, Factory Labor']
+  description text
+  accountType varchar [note: 'expense, revenue, overhead']
+  createdBy ObjectId
+  createdAt datetime [default: `now()`]
+  updatedAt datetime [default: `now()`]
+  
+  Note: 'Cost centers for budget tracking'
+}
+
+// ============================================
+// BUDGET MANAGEMENT
+// ============================================
+
+Table budgets {
+  _id ObjectId [pk]
+  name varchar [not null]
+  analyticalAccountId ObjectId [not null]
+  amount decimal [not null, note: 'min: 0']
+  period_startDate datetime [not null]
+  period_endDate datetime [not null]
+  period_periodType varchar [not null, note: 'monthly, quarterly, yearly, custom']
+  spentAmount decimal [default: 0]
+  revisedAmount decimal [default: 0]
+  remainingAmount decimal [note: 'calculated: amount - spentAmount']
+  createdBy ObjectId
+  createdAt datetime [default: `now()`]
+  updatedAt datetime [default: `now()`]
+  
+  Note: 'Budget allocations linked to analytical accounts'
+}
+
+Table auto_analytical_models {
+  _id ObjectId [pk]
+  name varchar [not null]
+  ruleType varchar [not null, note: 'vendor_based, product_based, amount_based, custom']
+  conditions_vendorId ObjectId [ref: > contacts._id]
+  conditions_productId ObjectId [ref: > products._id]
+  conditions_minAmount decimal
+  conditions_maxAmount decimal
+  conditions_keywords text [note: 'array of keywords']
+  analyticalAccountId ObjectId [not null]
+  priority integer [default: 0, note: 'higher priority checked first']
+  createdBy ObjectId
+  createdAt datetime [default: `now()`]
+  updatedAt datetime [default: `now()`]
+  
+  Note: 'Rules for automatic cost center assignment'
+}
+
+// ============================================
+// VENDOR OPERATIONS
+// ============================================
+
+Table vendor_bills {
+  _id ObjectId [pk]
+  billNumber varchar [not null, unique]
+  referenceNumber varchar [not null, unique]
+  vendorId ObjectId [not null]
+    purchaseOrderId ObjectId [note: 'if generated from purchase order']
+  billDate datetime [not null]
+  dueDate datetime
+  items_productId ObjectId [note: 'array of items']
+  items_description text
+  items_quantity decimal [not null, note: 'min: 0']
+  items_unitPrice decimal [not null, note: 'min: 0']
+  items_taxRate decimal [default: 0]
+  items_amount decimal [not null]
+  subtotal decimal [not null, note: 'min: 0']
+  taxAmount decimal [default: 0]
+  totalAmount decimal [not null, note: 'min: 0']
+  analyticalAccountId ObjectId [note: 'auto-assigned or manual']
+  status varchar [default: 'draft', note: 'draft, confirmed, paid, cancelled']
+  notes text
+  attachments text [note: 'array of file paths']
+  createdBy ObjectId
+  createdAt datetime [default: `now()`]
+  updatedAt datetime [default: `now()`]
+  
+  Note: 'Bills received from vendors'
+}
+
+Table bill_payments {
+  _id ObjectId [pk]
+  paymentNumber varchar [not null, unique]
+  vendorBillId ObjectId [not null]
+  vendorId ObjectId [not null]
+  paymentDate datetime [not null]
+  paymentMethod varchar [not null, note: 'cash, cheque, bank_transfer, online, other']
+  amount decimal [not null, note: 'min: 0']
+  referenceNumber varchar [note: 'cheque number, transaction ID']
+  notes text
+  analyticalAccountId ObjectId
+  status varchar [default: 'pending', note: 'pending, completed, cancelled']
+  createdBy ObjectId
+  createdAt datetime [default: `now()`]
+  updatedAt datetime [default: `now()`]
+  
+  Note: 'Payments made for vendor bills'
+}
+
+// ============================================
+// CUSTOMER OPERATIONS
+// ============================================
+
+Table sales_orders {
+  _id ObjectId [pk]
+  orderNumber varchar [not null, unique]
+    referenceNumber varchar [not null, unique]
+
+  customerId ObjectId [not null]
+  orderDate datetime [not null]
+  deliveryDate datetime
+  items_productId ObjectId [note: 'array of items']
+  items_description text
+  items_quantity decimal [not null, note: 'min: 0']
+  items_unitPrice decimal [not null, note: 'min: 0']
+  items_taxRate decimal [default: 0]
+  items_amount decimal [not null]
+  subtotal decimal [not null, note: 'min: 0']
+  taxAmount decimal [default: 0]
+  totalAmount decimal [not null, note: 'min: 0']
+  analyticalAccountId ObjectId
+  status varchar [default: 'draft', note: 'draft, confirmed, invoiced, delivered, cancelled']
+  notes text
+  createdBy ObjectId
+  createdAt datetime [default: `now()`]
+  updatedAt datetime [default: `now()`]
+  
+  Note: 'Customer orders'
+}
+
+Table customer_invoices {
+  _id ObjectId [pk]
+  invoiceNumber varchar [not null, unique]
+    referenceNumber varchar [not null, unique]
+  salesOrderId ObjectId [note: 'if generated from sales order']
+  customerId ObjectId [not null]
+  invoiceDate datetime [not null]
+  dueDate datetime
+  items_productId ObjectId [note: 'array of items']
+  items_description text
+  items_quantity decimal [not null, note: 'min: 0']
+  items_unitPrice decimal [not null, note: 'min: 0']
+  items_taxRate decimal [default: 0]
+  items_amount decimal [not null]
+  subtotal decimal [not null, note: 'min: 0']
+  taxAmount decimal [default: 0]
+  totalAmount decimal [not null, note: 'min: 0']
+  paidAmount decimal [default: 0, note: 'sum of all payments']
+  remainingAmount decimal [note: 'calculated: totalAmount - paidAmount']
+  analyticalAccountId ObjectId
+  status varchar [default: 'draft', note: 'draft, sent, paid, partially_paid, overdue, cancelled']
+  notes text
+  attachments text [note: 'array of file paths']
+  createdBy ObjectId
+  createdAt datetime [default: `now()`]
+  updatedAt datetime [default: `now()`]
+  
+  Note: 'Invoices sent to customers'
+}
+
+Table purchase_orders {
+  _id ObjectId [pk]
+  orderNumber varchar [not null, unique]
+  vendorId ObjectId [not null]
+  orderDate datetime [not null]
+  expectedDeliveryDate datetime
+  items_productId ObjectId [note: 'array of items']
+  items_description text
+  items_quantity decimal [not null, note: 'min: 0']
+  items_unitPrice decimal [not null, note: 'min: 0']
+  items_taxRate decimal [default: 0]
+  items_amount decimal [not null]
+  subtotal decimal [not null, note: 'min: 0']
+  taxAmount decimal [default: 0]
+  totalAmount decimal [not null, note: 'min: 0']
+  analyticalAccountId ObjectId [note: 'auto-assigned or manual']
+  status varchar [default: 'draft', note: 'draft, sent, confirmed, received, cancelled']
+  notes text
+  attachments text [note: 'array of file paths']
+  createdBy ObjectId
+  createdAt datetime [default: `now()`]
+  updatedAt datetime [default: `now()`]
+  
+  Note: 'Purchase orders sent to vendors'
+}
+
+Table invoice_payments {
+  _id ObjectId [pk]
+  paymentNumber varchar [not null, unique]
+  customerInvoiceId ObjectId [not null]
+  customerId ObjectId [not null]
+  paymentDate datetime [not null]
+  paymentMethod varchar [not null, note: 'cash, cheque, bank_transfer, online, other']
+  amount decimal [not null, note: 'min: 0']
+  referenceNumber varchar
+  notes text
+  analyticalAccountId ObjectId
+  status varchar [default: 'pending', note: 'pending, completed, cancelled']
+  createdBy ObjectId
+  createdAt datetime [default: `now()`]
+  updatedAt datetime [default: `now()`]
+  
+  Note: 'Payments received from customers'
+}
+
+// ============================================
+// RELATIONSHIPS
+// ============================================
+
+// User creates all records
+Ref: contacts.createdBy > users._id
+Ref: products.createdBy > users._id
+Ref: analytical_accounts.createdBy > users._id
+Ref: budgets.createdBy > users._id
+Ref: purchase_orders.createdBy > users._id
+Ref: auto_analytical_models.createdBy > users._id
+Ref: vendor_bills.createdBy > users._id
+Ref: bill_payments.createdBy > users._id
+Ref: sales_orders.createdBy > users._id
+Ref: customer_invoices.createdBy > users._id
+Ref: invoice_payments.createdBy > users._id
+
+// Analytical Account relationships
+Ref: budgets.analyticalAccountId > analytical_accounts._id
+Ref: auto_analytical_models.analyticalAccountId > analytical_accounts._id
+Ref: purchase_orders.analyticalAccountId > analytical_accounts._id
+Ref: vendor_bills.analyticalAccountId > analytical_accounts._id
+Ref: bill_payments.analyticalAccountId > analytical_accounts._id
+Ref: sales_orders.analyticalAccountId > analytical_accounts._id
+Ref: customer_invoices.analyticalAccountId > analytical_accounts._id
+Ref: invoice_payments.analyticalAccountId > analytical_accounts._id
+
+// Contact relationships (vendors and customers)
+Ref: vendor_bills.vendorId > contacts._id
+Ref: purchase_orders.vendorId > contacts._id
+Ref: bill_payments.vendorId > contacts._id
+Ref: sales_orders.customerId > contacts._id
+Ref: customer_invoices.customerId > contacts._id
+Ref: invoice_payments.customerId > contacts._id
+
+// Note: auto_analytical_models has conditional references to products and contacts
+// based on ruleType, but these are not direct foreign keys
+
+// Invoice flow relationships
+Ref: bill_payments.vendorBillId > vendor_bills._id
+Ref: vendor_bills.purchaseOrderId > purchase_orders._id
+Ref: customer_invoices.salesOrderId > sales_orders._id
+Ref: invoice_payments.customerInvoiceId > customer_invoices._id

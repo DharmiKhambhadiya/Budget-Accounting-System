@@ -1,0 +1,1522 @@
+{
+	"info": {
+		"_postman_id": "budget-app-collection",
+		"name": "Budget App API Collection",
+		"description": "Complete API collection for Budget and Invoicing Management System",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{authToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "authToken",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "User Login",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"loginId\": \"johndoe\",\n  \"password\": \"Password123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "login"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.data && response.data.token) {",
+									"        pm.collectionVariables.set('authToken', response.data.token);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Admin Register",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Admin User\",\n  \"loginId\": \"admin\",\n  \"email\": \"admin@example.com\",\n  \"password\": \"Admin123!\",\n  \"role\": \"admin\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/admin/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "admin", "register"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    if (response.data && response.data.token) {",
+									"        pm.collectionVariables.set('authToken', response.data.token);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Admin Login",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"loginId\": \"admin\",\n  \"password\": \"Admin123!\",\n  \"role\": \"admin\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/admin/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "admin", "login"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.data && response.data.token) {",
+									"        pm.collectionVariables.set('authToken', response.data.token);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Get Current User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "me"]
+						}
+					}
+				},
+				{
+					"name": "Admin Create User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Jane Doe\",\n  \"loginId\": \"janedoe\",\n  \"email\": \"jane@example.com\",\n  \"password\": \"Password123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/admin/create-user",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "admin", "create-user"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Get Profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/profile",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "profile"]
+						}
+					}
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"John Updated\",\n  \"email\": \"johnupdated@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/profile",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "profile"]
+						}
+					}
+				},
+				{
+					"name": "Update Password",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"currentPassword\": \"Password123!\",\n  \"newPassword\": \"NewPassword123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/profile/password",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "profile", "password"]
+						}
+					}
+				},
+				{
+					"name": "Get All Users (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/users",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users"]
+						}
+					}
+				},
+				{
+					"name": "Get User by ID (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update User (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated Name\",\n  \"role\": \"admin\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete User (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Contacts",
+			"item": [
+				{
+					"name": "Get All Contacts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/contacts?contactType=vendor",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "contacts"],
+							"query": [
+								{
+									"key": "contactType",
+									"value": "vendor",
+									"description": "vendor or customer"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Contact by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/contacts/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "contacts", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Contact",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Timber Mart\",\n  \"contactType\": \"vendor\",\n  \"addressLine1\": \"123 Main Street\",\n  \"addressLine2\": \"Industrial Area\",\n  \"email\": \"info@timmermart.com\",\n  \"phone\": \"+91-9876543210\",\n  \"tags\": [\"wood\", \"supplier\"]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/contacts",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "contacts"]
+						}
+					}
+				},
+				{
+					"name": "Update Contact",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Timber Mart Updated\",\n  \"phone\": \"+91-9876543211\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/contacts/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "contacts", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Contact",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/contacts/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "contacts", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Products",
+			"item": [
+				{
+					"name": "Get All Products",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/products?category=Office Chairs",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "products"],
+							"query": [
+								{
+									"key": "category",
+									"value": "Office Chairs"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Product by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/products/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "products", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Product",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Office Chair\",\n  \"description\": \"Ergonomic office chair\",\n  \"category\": \"Office Chairs\",\n  \"unit\": \"pcs\",\n  \"salesPrice\": 5000,\n  \"purchasePrice\": 3000,\n  \"stockQuantity\": 100\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/products",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "products"]
+						}
+					}
+				},
+				{
+					"name": "Update Product",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"salesPrice\": 5500,\n  \"stockQuantity\": 120\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/products/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "products", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Product",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/products/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "products", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Analytical Accounts",
+			"item": [
+				{
+					"name": "Get All Analytical Accounts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/analytical-accounts",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "analytical-accounts"]
+						}
+					}
+				},
+				{
+					"name": "Get Analytical Account by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/analytical-accounts/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "analytical-accounts", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Analytical Account",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Showroom Rent\",\n  \"description\": \"Monthly showroom rental expenses\",\n  \"accountType\": \"expense\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/analytical-accounts",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "analytical-accounts"]
+						}
+					}
+				},
+				{
+					"name": "Update Analytical Account",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"description\": \"Updated description\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/analytical-accounts/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "analytical-accounts", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Analytical Account",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/analytical-accounts/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "analytical-accounts", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Budgets",
+			"item": [
+				{
+					"name": "Get All Budgets",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/budgets?analyticalAccountId=",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "budgets"],
+							"query": [
+								{
+									"key": "analyticalAccountId",
+									"value": "",
+									"description": "Filter by analytical account"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Budget by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/budgets/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "budgets", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Budget",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Marketing Expo Q1 Budget\",\n  \"analyticalAccountId\": \"\",\n  \"amount\": 500000,\n  \"period\": {\n    \"startDate\": \"2024-01-01\",\n    \"endDate\": \"2024-03-31\",\n    \"periodType\": \"quarterly\"\n  },\n  \"revisedAmount\": 0\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/budgets",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "budgets"]
+						}
+					}
+				},
+				{
+					"name": "Update Budget",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"revisedAmount\": 550000\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/budgets/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "budgets", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Budget",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/budgets/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "budgets", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Auto-Analytical Models",
+			"item": [
+				{
+					"name": "Get All Auto-Analytical Models",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auto-analytical-models?ruleType=vendor_based",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auto-analytical-models"],
+							"query": [
+								{
+									"key": "ruleType",
+									"value": "vendor_based",
+									"description": "vendor_based, product_based, amount_based, custom"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Auto-Analytical Model by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auto-analytical-models/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auto-analytical-models", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Auto-Analytical Model",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Timber Mart to Production\",\n  \"ruleType\": \"vendor_based\",\n  \"conditions\": {\n    \"vendorId\": \"\"\n  },\n  \"analyticalAccountId\": \"\",\n  \"priority\": 10\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auto-analytical-models",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auto-analytical-models"]
+						}
+					}
+				},
+				{
+					"name": "Update Auto-Analytical Model",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"priority\": 15\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auto-analytical-models/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auto-analytical-models", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Auto-Analytical Model",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auto-analytical-models/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auto-analytical-models", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Purchase Orders",
+			"item": [
+				{
+					"name": "Get All Purchase Orders",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/purchase-orders?vendorId=&status=draft",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "purchase-orders"],
+							"query": [
+								{
+									"key": "vendorId",
+									"value": ""
+								},
+								{
+									"key": "status",
+									"value": "draft"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Purchase Order by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/purchase-orders/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "purchase-orders", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Purchase Order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"vendorId\": \"\",\n  \"orderDate\": \"2024-01-15\",\n  \"expectedDeliveryDate\": \"2024-01-30\",\n  \"items\": [\n    {\n      \"productId\": \"\",\n      \"description\": \"Raw Timber\",\n      \"quantity\": 100,\n      \"unitPrice\": 500,\n      \"taxRate\": 18,\n      \"amount\": 59000\n    }\n  ],\n  \"subtotal\": 50000,\n  \"taxAmount\": 9000,\n  \"totalAmount\": 59000,\n  \"status\": \"draft\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/purchase-orders",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "purchase-orders"]
+						}
+					}
+				},
+				{
+					"name": "Update Purchase Order",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"sent\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/purchase-orders/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "purchase-orders", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Purchase Order",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/purchase-orders/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "purchase-orders", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Vendor Bills",
+			"item": [
+				{
+					"name": "Get All Vendor Bills",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/vendor-bills?vendorId=&status=draft",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "vendor-bills"],
+							"query": [
+								{
+									"key": "vendorId",
+									"value": ""
+								},
+								{
+									"key": "status",
+									"value": "draft"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Vendor Bill by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/vendor-bills/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "vendor-bills", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Vendor Bill",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"vendorId\": \"\",\n  \"purchaseOrderId\": \"\",\n  \"billDate\": \"2024-01-20\",\n  \"dueDate\": \"2024-02-20\",\n  \"items\": [\n    {\n      \"productId\": \"\",\n      \"description\": \"Raw Timber\",\n      \"quantity\": 100,\n      \"unitPrice\": 500,\n      \"taxRate\": 18,\n      \"amount\": 59000\n    }\n  ],\n  \"subtotal\": 50000,\n  \"taxAmount\": 9000,\n  \"totalAmount\": 59000,\n  \"status\": \"draft\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/vendor-bills",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "vendor-bills"]
+						}
+					}
+				},
+				{
+					"name": "Update Vendor Bill",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"confirmed\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/vendor-bills/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "vendor-bills", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Vendor Bill",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/vendor-bills/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "vendor-bills", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Bill Payments",
+			"item": [
+				{
+					"name": "Get All Bill Payments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/bill-payments?vendorBillId=&status=completed",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "bill-payments"],
+							"query": [
+								{
+									"key": "vendorBillId",
+									"value": ""
+								},
+								{
+									"key": "status",
+									"value": "completed"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Bill Payment by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/bill-payments/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "bill-payments", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Bill Payment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"vendorBillId\": \"\",\n  \"vendorId\": \"\",\n  \"paymentDate\": \"2024-02-15\",\n  \"paymentMethod\": \"bank_transfer\",\n  \"amount\": 59000,\n  \"referenceNumber\": \"TXN123456\",\n  \"status\": \"completed\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/bill-payments",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "bill-payments"]
+						}
+					}
+				},
+				{
+					"name": "Update Bill Payment",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"completed\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/bill-payments/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "bill-payments", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Bill Payment",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/bill-payments/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "bill-payments", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Sales Orders",
+			"item": [
+				{
+					"name": "Get All Sales Orders",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/sales-orders?customerId=&status=draft",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "sales-orders"],
+							"query": [
+								{
+									"key": "customerId",
+									"value": ""
+								},
+								{
+									"key": "status",
+									"value": "draft"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Sales Order by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/sales-orders/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "sales-orders", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Sales Order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerId\": \"\",\n  \"orderDate\": \"2024-01-15\",\n  \"deliveryDate\": \"2024-01-30\",\n  \"items\": [\n    {\n      \"productId\": \"\",\n      \"description\": \"Office Chair\",\n      \"quantity\": 10,\n      \"unitPrice\": 5000,\n      \"taxRate\": 18,\n      \"amount\": 59000\n    }\n  ],\n  \"subtotal\": 50000,\n  \"taxAmount\": 9000,\n  \"totalAmount\": 59000,\n  \"status\": \"draft\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/sales-orders",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "sales-orders"]
+						}
+					}
+				},
+				{
+					"name": "Update Sales Order",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"confirmed\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/sales-orders/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "sales-orders", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Sales Order",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/sales-orders/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "sales-orders", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Customer Invoices",
+			"item": [
+				{
+					"name": "Get All Customer Invoices",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/customer-invoices?customerId=&status=sent",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "customer-invoices"],
+							"query": [
+								{
+									"key": "customerId",
+									"value": ""
+								},
+								{
+									"key": "status",
+									"value": "sent"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Customer Invoice by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/customer-invoices/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "customer-invoices", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Customer Invoice",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"salesOrderId\": \"\",\n  \"customerId\": \"\",\n  \"invoiceDate\": \"2024-01-20\",\n  \"dueDate\": \"2024-02-20\",\n  \"items\": [\n    {\n      \"productId\": \"\",\n      \"description\": \"Office Chair\",\n      \"quantity\": 10,\n      \"unitPrice\": 5000,\n      \"taxRate\": 18,\n      \"amount\": 59000\n    }\n  ],\n  \"subtotal\": 50000,\n  \"taxAmount\": 9000,\n  \"totalAmount\": 59000,\n  \"status\": \"draft\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/customer-invoices",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "customer-invoices"]
+						}
+					}
+				},
+				{
+					"name": "Update Customer Invoice",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"sent\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/customer-invoices/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "customer-invoices", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Customer Invoice",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/customer-invoices/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "customer-invoices", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Invoice Payments",
+			"item": [
+				{
+					"name": "Get All Invoice Payments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/invoice-payments?customerInvoiceId=&status=completed",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "invoice-payments"],
+							"query": [
+								{
+									"key": "customerInvoiceId",
+									"value": ""
+								},
+								{
+									"key": "status",
+									"value": "completed"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Invoice Payment by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/invoice-payments/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "invoice-payments", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Invoice Payment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerInvoiceId\": \"\",\n  \"customerId\": \"\",\n  \"paymentDate\": \"2024-02-15\",\n  \"paymentMethod\": \"bank_transfer\",\n  \"amount\": 59000,\n  \"referenceNumber\": \"TXN123456\",\n  \"status\": \"completed\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/invoice-payments",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "invoice-payments"]
+						}
+					}
+				},
+				{
+					"name": "Update Invoice Payment",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"completed\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/invoice-payments/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "invoice-payments", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Invoice Payment",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/invoice-payments/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "invoice-payments", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				}
+			]
+		}
+	]
+}

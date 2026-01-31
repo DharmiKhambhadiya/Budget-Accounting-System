@@ -1,43 +1,93 @@
-import { useState } from 'react';
-import DataTable from '../../components/DataTable';
-import FormModal from '../../components/FormModal';
-import StatusBadge from '../../components/StatusBadge';
-import { getContacts } from '../../utils/dataLoader';
-import './MasterPage.css';
+import { useState } from "react";
+import DataTable from "../../components/DataTable";
+import FormModal from "../../components/FormModal";
+import StatusBadge from "../../components/StatusBadge";
+import { getContacts } from "../../utils/dataLoader";
+import "./MasterPage.css";
 
 const Contacts = () => {
   const [contacts, setContacts] = useState(getContacts());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedContact, setSelectedContact] = useState(null);
   const [formData, setFormData] = useState({
-    name: '',
-    contactType: 'Customer',
-    email: '',
-    phone: '',
-    address: ''
+    name: "",
+    contactType: "Customer",
+    email: "",
+    phone: "",
+    address: "",
+    image: null,
+    tags: [],
+    tagsInput: "",
   });
 
   const columns = [
-    { key: 'name', header: 'Name', width: '25%' },
     {
-      key: 'contactType',
-      header: 'Type',
-      width: '15%',
-      render: (row) => <StatusBadge status={row.contactType} />
+      key: "image",
+      header: "Image",
+      width: "8%",
+      render: (row) => (
+        <div style={{ display: "flex", alignItems: "center" }}>
+          {row.image ? (
+            <img
+              src={row.image}
+              alt="avatar"
+              style={{
+                width: 40,
+                height: 40,
+                objectFit: "cover",
+                borderRadius: 4,
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                width: 40,
+                height: 40,
+                background: "#eee",
+                borderRadius: 4,
+              }}
+            />
+          )}
+        </div>
+      ),
     },
-    { key: 'email', header: 'Email', width: '25%' },
-    { key: 'phone', header: 'Phone', width: '15%' },
-    { key: 'address', header: 'Address', width: '20%' }
+    { key: "name", header: "Name", width: "25%" },
+    {
+      key: "contactType",
+      header: "Type",
+      width: "15%",
+      render: (row) => <StatusBadge status={row.contactType} />,
+    },
+    { key: "email", header: "Email", width: "25%" },
+    { key: "phone", header: "Phone", width: "15%" },
+    {
+      key: "tags",
+      header: "Tags",
+      width: "12%",
+      render: (row) => (
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          {(row.tags || []).map((t, i) => (
+            <span key={i} className="status-badge">
+              {t}
+            </span>
+          ))}
+        </div>
+      ),
+    },
+    { key: "address", header: "Address", width: "20%" },
   ];
 
   const handleAdd = () => {
     setSelectedContact(null);
     setFormData({
-      name: '',
-      contactType: 'Customer',
-      email: '',
-      phone: '',
-      address: ''
+      name: "",
+      contactType: "Customer",
+      email: "",
+      phone: "",
+      address: "",
+      image: null,
+      tags: [],
+      tagsInput: "",
     });
     setIsModalOpen(true);
   };
@@ -49,20 +99,35 @@ const Contacts = () => {
       contactType: contact.contactType,
       email: contact.email,
       phone: contact.phone,
-      address: contact.address
+      address: contact.address,
+      image: contact.image || null,
+      tags: contact.tags || [],
+      tagsInput: contact.tags ? contact.tags.join(", ") : "",
     });
     setIsModalOpen(true);
   };
 
   const handleSave = () => {
+    // parse tags input into array
+    const parsedTags = formData.tagsInput
+      ? formData.tagsInput
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean)
+      : formData.tags || [];
+
+    const payload = { ...formData, tags: parsedTags };
+
     if (selectedContact) {
-      setContacts(contacts.map(c =>
-        c.id === selectedContact.id ? { ...selectedContact, ...formData } : c
-      ));
+      setContacts(
+        contacts.map((c) =>
+          c.id === selectedContact.id ? { ...c, ...payload } : c,
+        ),
+      );
     } else {
       const newContact = {
-        id: Math.max(...contacts.map(c => c.id)) + 1,
-        ...formData
+        id: contacts.length ? Math.max(...contacts.map((c) => c.id)) + 1 : 1,
+        ...payload,
       };
       setContacts([...contacts, newContact]);
     }
@@ -100,7 +165,7 @@ const Contacts = () => {
       <FormModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={selectedContact ? 'Edit Contact' : 'Add Contact'}
+        title={selectedContact ? "Edit Contact" : "Add Contact"}
         size="medium"
       >
         <div className="form-group">
@@ -117,7 +182,9 @@ const Contacts = () => {
           <select
             className="form-select"
             value={formData.contactType}
-            onChange={(e) => setFormData({ ...formData, contactType: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, contactType: e.target.value })
+            }
           >
             <option value="Customer">Customer</option>
             <option value="Vendor">Vendor</option>
@@ -129,7 +196,9 @@ const Contacts = () => {
             type="email"
             className="form-input"
             value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, email: e.target.value })
+            }
           />
         </div>
         <div className="form-group">
@@ -138,7 +207,9 @@ const Contacts = () => {
             type="text"
             className="form-input"
             value={formData.phone}
-            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, phone: e.target.value })
+            }
           />
         </div>
         <div className="form-group">
@@ -146,11 +217,75 @@ const Contacts = () => {
           <textarea
             className="form-textarea"
             value={formData.address}
-            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, address: e.target.value })
+            }
           />
         </div>
+        <div className="form-group">
+          <label className="form-label">Image</label>
+          <input
+            type="file"
+            accept="image/*"
+            className="form-input"
+            onChange={(e) => {
+              const file = e.target.files && e.target.files[0];
+              if (!file) return;
+              const reader = new FileReader();
+              reader.onload = () => {
+                setFormData({ ...formData, image: reader.result });
+              };
+              reader.readAsDataURL(file);
+            }}
+          />
+          {formData.image && (
+            <div style={{ marginTop: 8 }}>
+              <img
+                src={formData.image}
+                alt="preview"
+                style={{
+                  width: 80,
+                  height: 80,
+                  objectFit: "cover",
+                  borderRadius: 6,
+                }}
+              />
+            </div>
+          )}
+        </div>
+        <div className="form-group">
+          <label className="form-label">Tags (comma separated)</label>
+          <input
+            type="text"
+            className="form-input"
+            placeholder="e.g. wholesale, priority"
+            value={formData.tagsInput}
+            onChange={(e) =>
+              setFormData({ ...formData, tagsInput: e.target.value })
+            }
+          />
+          {formData.tagsInput && (
+            <div style={{ marginTop: 8 }}>
+              {formData.tagsInput.split(",").map((t, i) => {
+                const tag = t.trim();
+                return tag ? (
+                  <span
+                    key={i}
+                    className="status-badge"
+                    style={{ marginRight: 6 }}
+                  >
+                    {tag}
+                  </span>
+                ) : null;
+              })}
+            </div>
+          )}
+        </div>
         <div className="form-actions">
-          <button className="btn btn-secondary" onClick={() => setIsModalOpen(false)}>
+          <button
+            className="btn btn-secondary"
+            onClick={() => setIsModalOpen(false)}
+          >
             Cancel
           </button>
           <button className="btn btn-primary" onClick={handleSave}>
