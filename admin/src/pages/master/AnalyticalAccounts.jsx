@@ -1,11 +1,12 @@
 import { useState } from 'react';
+import { toast } from 'react-toastify';
 import DataTable from '../../components/DataTable';
 import FormModal from '../../components/FormModal';
-import { getAnalyticalAccounts } from '../../utils/dataLoader';
+import { mockAnalyticalAccounts } from '../../data/mockData';
 import './MasterPage.css';
 
 const AnalyticalAccounts = () => {
-  const [accounts, setAccounts] = useState(getAnalyticalAccounts());
+  const [accounts, setAccounts] = useState(mockAnalyticalAccounts);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [formData, setFormData] = useState({
@@ -33,26 +34,41 @@ const AnalyticalAccounts = () => {
   const handleEdit = (account) => {
     setSelectedAccount(account);
     setFormData({
-      name: account.name,
-      description: account.description,
-      accountType: account.accountType
+      name: account.name || '',
+      description: account.description || '',
+      accountType: account.accountType || 'Expense'
     });
     setIsModalOpen(true);
   };
 
   const handleSave = () => {
-    if (selectedAccount) {
-      setAccounts(accounts.map(a =>
-        a.id === selectedAccount.id ? { ...selectedAccount, ...formData } : a
-      ));
-    } else {
-      const newAccount = {
-        id: Math.max(...accounts.map(a => a.id)) + 1,
-        ...formData
-      };
-      setAccounts([...accounts, newAccount]);
+    try {
+      if (selectedAccount) {
+        // UPDATE
+        const updatedAccount = {
+          ...selectedAccount,
+          ...formData
+        };
+        setAccounts(accounts.map(a =>
+          (a._id || a.id) === (selectedAccount._id || selectedAccount.id)
+            ? updatedAccount
+            : a
+        ));
+        toast.success('Analytical account updated successfully');
+      } else {
+        // CREATE
+        const newAccount = {
+          ...formData,
+          _id: Date.now().toString()
+        };
+        setAccounts([...accounts, newAccount]);
+        toast.success('Analytical account added successfully');
+      }
+      setIsModalOpen(false);
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to save analytical account');
     }
-    setIsModalOpen(false);
   };
 
   return (

@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { mockUser } from "../data/mockData";
 
 const AuthContext = createContext(null);
 
@@ -18,55 +19,26 @@ export const AuthProvider = ({ children }) => {
   // Check for existing auth on mount
   useEffect(() => {
     const token = localStorage.getItem("authToken");
-    const userData = localStorage.getItem("userData");
 
-    if (token && userData) {
-      try {
-        setUser(JSON.parse(userData));
-        setIsAuthenticated(true);
-      } catch (error) {
-        console.error("Error parsing user data:", error);
-        localStorage.removeItem("authToken");
-        localStorage.removeItem("userData");
-      }
+    if (token) {
+      setUser(mockUser);
+      setIsAuthenticated(true);
     }
     setLoading(false);
   }, []);
 
-  const login = async (name, loginId, email, password) => {
-    // Mock login - replace with actual API call
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    // Mock successful login
-    const mockUser = {
-      id: "1",
-      name: name,
-      loginId: loginId,
-      email: email,
-    };
-
-    const mockToken = "mock-jwt-token-" + Date.now();
-
-    localStorage.setItem("authToken", mockToken);
-    localStorage.setItem("userData", JSON.stringify(mockUser));
-
+  const login = async (email, password) => {
+    // Immediate success for demo
+    localStorage.setItem("authToken", "demo-token");
     setUser(mockUser);
     setIsAuthenticated(true);
-
     return { success: true };
   };
 
   const logout = () => {
     localStorage.removeItem("authToken");
-    localStorage.removeItem("userData");
     setUser(null);
     setIsAuthenticated(false);
-  };
-
-  const updateUserProfile = (userData) => {
-    setUser(userData);
-    localStorage.setItem("userData", JSON.stringify(userData));
   };
 
   const value = {
@@ -75,7 +47,7 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     loading,
-    setUser: updateUserProfile,
+    setUser
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

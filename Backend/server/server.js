@@ -32,8 +32,8 @@ app.use(helmet());
 app.use(
   cors({
     origin: [
-      "http://localhost:5173", // User Portal
-      "http://localhost:5174", // Admin Portal
+      "http://localhost:5174", // User Portal
+      "http://localhost:5173", // Admin Portal
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
@@ -92,11 +92,31 @@ app.use((req, res) => {
   });
 });
 
-const PORT = process.env.PORT || 3000;
+const DEFAULT_PORT = parseInt(process.env.PORT, 10) || 5000;
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📝 Environment: ${process.env.NODE_ENV || "development"}`);
-});
+function startServer(port, retries = 5) {
+  const server = app.listen(port, () => {
+    console.log(`🚀 Server running on port ${port}`);
+    console.log(`📝 Environment: ${process.env.NODE_ENV || "development"}`);
+  });
+
+  server.on("error", (err) => {
+    if (err && err.code === "EADDRINUSE") {
+      console.warn(`Port ${port} in use.`);
+      if (retries > 0) {
+        const nextPort = port + 1;
+        console.log(`Trying port ${nextPort} (${retries} retries left)...`);
+        setTimeout(() => startServer(nextPort, retries - 1), 500);
+        return;
+      }
+      console.error(`All retries exhausted. Could not bind to a port.`);
+      process.exit(1);
+    }
+    console.error("Server error:", err);
+    process.exit(1);
+  });
+}
+
+startServer(DEFAULT_PORT, 10);
 
 export default app;

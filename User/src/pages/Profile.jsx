@@ -55,49 +55,22 @@ const Profile = () => {
 
     setIsLoading(true);
     try {
-      // Mock API call - replace with actual API call when backend is ready
       // Simulate API delay
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // For now, use mock data and localStorage
-      // When backend is ready, uncomment the API call below:
-      /*
-      const response = await api.put("/users/profile", {
-        name: formData.name,
-        email: formData.email,
-      });
-      */
-
-      // Update user in context and localStorage
+      // Update user in context (localStorage is handled by AuthContext)
       const updatedUser = {
         ...user,
         name: formData.name.trim(),
         email: formData.email.trim(),
       };
-      
+
       setUser(updatedUser);
       toast.success("Profile updated successfully!");
       setIsEditing(false);
     } catch (error) {
       console.error("Profile update error:", error);
-      // Only show error if it's a real API error (not network error in mock mode)
-      if (error.response) {
-        const errorMessage =
-          error.response?.data?.message ||
-          error.message ||
-          "Failed to update profile. Please try again.";
-        toast.error(errorMessage);
-      } else {
-        // For network errors in development, still update locally
-        const updatedUser = {
-          ...user,
-          name: formData.name.trim(),
-          email: formData.email.trim(),
-        };
-        setUser(updatedUser);
-        toast.success("Profile updated successfully! (Local update - backend not connected)");
-        setIsEditing(false);
-      }
+      toast.error("Failed to update profile. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -201,9 +174,25 @@ const Profile = () => {
                   >
                     {isLoading ? (
                       <>
-                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        <svg
+                          className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
                         </svg>
                         Saving...
                       </>

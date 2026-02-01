@@ -2,15 +2,15 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, LogOut, ChevronDown } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { getCurrentUser, clearAuth } from '../utils/auth';
 
 const Header = () => {
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   
-  // Get current user from localStorage
-  const currentUserStr = localStorage.getItem('currentUser');
-  const currentUser = currentUserStr ? JSON.parse(currentUserStr) : null;
+  // Get current user using auth utility
+  const currentUser = getCurrentUser();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -25,11 +25,12 @@ const Header = () => {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('currentUser');
-    localStorage.removeItem('isAuthenticated');
+    // Use centralized auth utility to clear all auth data
+    clearAuth();
     toast.success('Logged out successfully');
-    navigate('/login');
     setDropdownOpen(false);
+    // Navigate to admin login page
+    navigate('/admin/login', { replace: true });
   };
 
   const getInitials = (name) => {

@@ -1,11 +1,12 @@
 import { useState } from 'react';
+import { toast } from 'react-toastify';
 import DataTable from '../../components/DataTable';
 import FormModal from '../../components/FormModal';
-import { getProducts, formatCurrency } from '../../utils/dataLoader';
+import { mockProducts } from '../../data/mockData';
 import './MasterPage.css';
 
 const Products = () => {
-  const [products, setProducts] = useState(getProducts());
+  const [products, setProducts] = useState(mockProducts);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [formData, setFormData] = useState({
@@ -63,18 +64,33 @@ const Products = () => {
   };
 
   const handleSave = () => {
-    if (selectedProduct) {
-      setProducts(products.map(p =>
-        p.id === selectedProduct.id ? { ...selectedProduct, ...formData } : p
-      ));
-    } else {
-      const newProduct = {
-        id: Math.max(...products.map(p => p.id)) + 1,
-        ...formData
-      };
-      setProducts([...products, newProduct]);
+    try {
+      if (selectedProduct) {
+        // Update
+        const updatedProduct = {
+          ...selectedProduct,
+          ...formData
+        };
+        setProducts(products.map(p =>
+          (p._id || p.id) === (selectedProduct._id || selectedProduct.id)
+            ? updatedProduct
+            : p
+        ));
+        toast.success('Product updated successfully');
+      } else {
+        // Create
+        const newProduct = {
+          ...formData,
+          _id: Date.now().toString()
+        };
+        setProducts([...products, newProduct]);
+        toast.success('Product added successfully');
+      }
+      setIsModalOpen(false);
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to save product');
     }
-    setIsModalOpen(false);
   };
 
   return (

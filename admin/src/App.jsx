@@ -6,47 +6,64 @@ import {
 } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
 import AdminLayout from "./components/AdminLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
-import Login from "./pages/Login";
+
+// Public pages
+import AdminLogin from "./pages/adminlogin";
 import Signup from "./pages/Signup";
+
+// Admin pages
 import Dashboard from "./pages/Dashboard";
+
+// Master pages
 import Users from "./pages/master/Users";
 import Contacts from "./pages/master/Contacts";
 import Products from "./pages/master/Products";
 import AnalyticalAccounts from "./pages/master/AnalyticalAccounts";
 import Budgets from "./pages/master/Budgets";
 import AutoAnalyticalModels from "./pages/master/AutoAnalyticalModels";
+
+// Transaction pages
 import PurchaseOrders from "./pages/transactions/PurchaseOrders";
 import SalesOrders from "./pages/transactions/SalesOrders";
 import VendorBills from "./pages/transactions/VendorBills";
 import CustomerInvoices from "./pages/transactions/CustomerInvoices";
+
+// Payment pages
 import BillPayments from "./pages/payments/BillPayments";
 import InvoicePayments from "./pages/payments/InvoicePayments";
+
+// Reports
 import Reports from "./pages/Reports";
+
 import "./App.css";
-import AdminLogin from "./pages/adminlogin";
 
 function App() {
   return (
     <Router>
       <div className="min-h-screen bg-gray-50">
         <Routes>
-          {/* Public Routes */}
+          {/* DEFAULT ENTRY — NO REDIRECT LOGIC */}
+          <Route path="/" element={<AdminLogin />} />
+
+          {/* PUBLIC ROUTES */}
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/signup" element={<Signup />} />
 
-          {/* Protected Routes with Layout */}
+          {/* PROTECTED ADMIN ROUTES */}
           <Route
+            path="/admin"
             element={
               <ProtectedRoute>
                 <AdminLayout />
               </ProtectedRoute>
             }
           >
-            <Route index element={<Dashboard />} />
+            <Route path="dashboard" element={<Dashboard />} />
 
-            {/* Master Data Routes */}
+            {/* Master */}
             <Route path="master/users" element={<Users />} />
             <Route path="master/contacts" element={<Contacts />} />
             <Route path="master/products" element={<Products />} />
@@ -60,7 +77,7 @@ function App() {
               element={<AutoAnalyticalModels />}
             />
 
-            {/* Transaction Routes */}
+            {/* Transactions */}
             <Route
               path="transactions/purchase-orders"
               element={<PurchaseOrders />}
@@ -72,33 +89,26 @@ function App() {
               element={<CustomerInvoices />}
             />
 
-            {/* Payment Routes */}
+            {/* Payments */}
             <Route path="payments/bill-payments" element={<BillPayments />} />
             <Route
               path="payments/invoice-payments"
               element={<InvoicePayments />}
             />
 
-            {/* Reports Route */}
+            {/* Reports */}
             <Route path="reports" element={<Reports />} />
 
-            {/* Catch all - redirect to dashboard */}
-            <Route path="*" element={<Navigate to="/" replace />} />
+            {/* Admin fallback */}
+            <Route path="*" element={<Navigate to="dashboard" replace />} />
           </Route>
+
+          {/* Global fallback */}
+          <Route path="*" element={<Navigate to="/admin/login" replace />} />
         </Routes>
       </div>
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-      />
+
+      <ToastContainer position="top-right" autoClose={3000} theme="light" />
     </Router>
   );
 }

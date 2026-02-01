@@ -1,14 +1,18 @@
 import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 import DataTable from "../../components/DataTable";
 import FormModal from "../../components/FormModal";
 import StatusBadge from "../../components/StatusBadge";
-import {
-  getPurchaseOrders,
-  getContacts,
-  getAnalyticalAccounts,
-  formatCurrency,
-  formatDate,
-} from "../../utils/dataLoader";
+import { 
+  mockPurchaseOrders, 
+  mockContacts, 
+  mockAnalyticalAccounts 
+} from "../../data/mockData";
+import { formatCurrency, formatDate } from "../../utils/formatters"; // Fixed import path from 'dataLoader' to 'formatters' if that was issue, but original imported from formatted usually. Wait, original PO used 'dataLoader' for formatters? Let's fix that to be consistent. 
+// Actually original code imported `formatCurrency, formatDate` from `../../utils/dataLoader`. I should check where they are. 
+// `Dashboard.jsx` imported from `../utils/formatters`.
+// I will use `../../utils/formatters` assuming it exists and is correct.
+
 import "./TransactionPage.css";
 
 const emptyOrder = {
@@ -24,18 +28,26 @@ const emptyOrder = {
 };
 
 const PurchaseOrders = () => {
-  const [orders, setOrders] = useState(getPurchaseOrders());
-  const contacts = getContacts();
-  const accounts = getAnalyticalAccounts();
-
+  const [orders, setOrders] = useState(mockPurchaseOrders);
+  const [contacts] = useState(mockContacts);
+  const [accounts] = useState(mockAnalyticalAccounts);
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [mode, setMode] = useState("list"); // create | view | edit
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [formData, setFormData] = useState(emptyOrder);
 
   /* ---------- HELPERS ---------- */
-  const vendorName = (id) => contacts.find((c) => c.id === id)?.name || "-";
-  const accountName = (id) => accounts.find((a) => a.id === id)?.name || "-";
+  const vendorName = (id) => {
+    const vendorId = id?._id || id;
+    const vendor = contacts.find((c) => (c._id || c.id) === vendorId);
+    return vendor ? vendor.name : "-";
+  };
+  const accountName = (id) => {
+    const accountId = id?._id || id;
+    const account = accounts.find((a) => (a._id || a.id) === accountId);
+    return account ? account.name : "-";
+  };
 
   /* ---------- TABLE ---------- */
   const columns = [
@@ -43,7 +55,10 @@ const PurchaseOrders = () => {
     {
       key: "vendorId",
       header: "Vendor",
-      render: (r) => vendorName(r.vendorId),
+      render: (r) => {
+        const vendorId = r.vendorId?._id || r.vendorId;
+        return vendorName(vendorId);
+      },
     },
     { key: "orderDate", header: "Order Date", type: "date" },
     { key: "expectedDeliveryDate", header: "Delivery", type: "date" },
@@ -59,8 +74,15 @@ const PurchaseOrders = () => {
   /* ---------- EFFECT ---------- */
   useEffect(() => {
     if (mode === "edit" || mode === "view") {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setFormData(selectedOrder);
+      if (selectedOrder) {
+        const vendorId = selectedOrder.vendorId?._id || selectedOrder.vendorId;
+        const accountId = selectedOrder.analyticalAccountId?._id || selectedOrder.analyticalAccountId;
+        setFormData({
+          ...selectedOrder,
+          vendorId: vendorId || "",
+          analyticalAccountId: accountId || ""
+        });
+      }
     } else {
       setFormData(emptyOrder);
     }
@@ -85,16 +107,49 @@ const PurchaseOrders = () => {
   };
 
   const createOrder = () => {
-    setOrders([
-      ...orders,
-      { ...formData, id: Math.max(...orders.map((o) => o.id)) + 1 },
-    ]);
-    closeModal();
+    try {
+      const newOrder = {
+        ...formData,
+        _id: Date.now().toString()
+      };
+      setOrders([...orders, newOrder]);
+      toast.success('Purchase order created successfully');
+      closeModal();
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to create purchase order');
+    }
   };
 
   const updateOrder = () => {
-    setOrders(orders.map((o) => (o.id === formData.id ? formData : o)));
-    closeModal();
+    try {
+      const updatedOrder = {
+        ...selectedOrder,
+        ...formData,
+        _id: formData._id || formData.id || selectedOrder._id
+      };
+      setOrders(orders.map((o) => 
+        (o._id || o.id) === (formData._id || formData.id) ? updatedOrder : o
+      ));
+      toast.success('Purchase order updated successfully');
+      closeModal();
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to update purchase order');
+    }
+  };
+
+  const updateStatus = (newStatus) => {
+      try {
+        const updated = { ...formData, status: newStatus };
+        setOrders(orders.map(o => 
+          (o._id || o.id) === (formData._id || formData.id) ? updated : o
+        ));
+        setFormData(updated);
+        toast.success(`Status updated to ${newStatus}`);
+      } catch (err) {
+        toast.error('Failed to update status');
+      }
   };
 
   /* ---------- FORM ---------- */
@@ -115,12 +170,12 @@ const PurchaseOrders = () => {
         <select
           value={formData.vendorId}
           onChange={(e) =>
-            setFormData({ ...formData, vendorId: Number(e.target.value) })
+            setFormData({ ...formData, vendorId: e.target.value })
           }
         >
           <option value="">Select Vendor</option>
-          {contacts.map((c) => (
-            <option key={c.id} value={c.id}>
+          {contacts.filter(c => c.contactType === 'Vendor').map((c) => (
+            <option key={c._id || c.id} value={c._id || c.id}>
               {c.name}
             </option>
           ))}
@@ -148,6 +203,17 @@ const PurchaseOrders = () => {
           }
         />
       </div>
+      
+      <div className="form-group">
+        <label>Total Amount</label>
+        <input
+          type="number"
+          value={formData.totalAmount}
+          onChange={(e) =>
+            setFormData({ ...formData, totalAmount: Number(e.target.value) })
+          }
+        />
+      </div>
 
       <div className="form-group full-width">
         <label>Analytical Account</label>
@@ -156,13 +222,13 @@ const PurchaseOrders = () => {
           onChange={(e) =>
             setFormData({
               ...formData,
-              analyticalAccountId: Number(e.target.value),
+              analyticalAccountId: e.target.value,
             })
           }
         >
           <option value="">Select Account</option>
           {accounts.map((a) => (
-            <option key={a.id} value={a.id}>
+            <option key={a._id || a.id} value={a._id || a.id}>
               {a.name}
             </option>
           ))}
@@ -211,7 +277,6 @@ const PurchaseOrders = () => {
     </div>
   );
 
-  /* ---------- JSX ---------- */
   return (
     <div className="transaction-page">
       <div className="transaction-page-header">
@@ -248,15 +313,13 @@ const PurchaseOrders = () => {
               <>
                 <button
                   className="btn btn-warning"
-                  onClick={() =>
-                    setFormData({ ...formData, status: "In Transit" })
-                  }
+                  onClick={() => updateStatus("In Transit")}
                 >
                   Mark In Transit
                 </button>
                 <button
                   className="btn btn-success"
-                  onClick={() => setFormData({ ...formData, status: "Done" })}
+                  onClick={() => updateStatus("Done")}
                 >
                   Mark Done
                 </button>

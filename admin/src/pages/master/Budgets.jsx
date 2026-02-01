@@ -1,8 +1,9 @@
 import { useState } from "react";
+import { toast } from "react-toastify";
 import DataTable from "../../components/DataTable";
 import FormModal from "../../components/FormModal";
 import StatusBadge from "../../components/StatusBadge";
-import { getBudgets, getAnalyticalAccounts } from "../../utils/dataLoader";
+import { mockBudgets, mockAnalyticalAccounts } from "../../data/mockData";
 import "./MasterPage.css";
 
 const emptyBudget = {
@@ -14,16 +15,21 @@ const emptyBudget = {
 };
 
 const Budgets = () => {
-  const [budgets, setBudgets] = useState(getBudgets());
-  const analyticalAccounts = getAnalyticalAccounts();
-
+  const [budgets, setBudgets] = useState(mockBudgets);
+  const [analyticalAccounts] = useState(mockAnalyticalAccounts);
+  // No loading state needed for static data
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBudget, setSelectedBudget] = useState(null);
   const [formData, setFormData] = useState(emptyBudget);
 
   /* ---------- HELPERS ---------- */
-  const getAccountName = (id) =>
-    analyticalAccounts.find((a) => a.id === id)?.name || "-";
+  const getAccountName = (id) => {
+    // Handle both populated object and ID string
+    const accountId = id?._id || id;
+    const account = analyticalAccounts.find((a) => a._id === accountId);
+    return account ? account.name : "-";
+  };
 
   const getPeriodStatus = (startDate, endDate) => {
     const today = new Date();
@@ -38,7 +44,10 @@ const Budgets = () => {
     {
       key: "analyticalAccountId",
       header: "Analytical Account",
-      render: (row) => getAccountName(row.analyticalAccountId),
+      render: (row) => {
+        const accountId = row.analyticalAccountId?._id || row.analyticalAccountId;
+        return getAccountName(accountId);
+      },
       width: "20%",
     },
     {
@@ -77,38 +86,57 @@ const Budgets = () => {
 
   const openEdit = (budget) => {
     setSelectedBudget(budget);
+    const accountId = budget.analyticalAccountId?._id || budget.analyticalAccountId;
     setFormData({
-      name: budget.name,
-      analyticalAccountId: budget.analyticalAccountId,
-      period_startDate: budget.period_startDate,
-      period_endDate: budget.period_endDate,
-      amount: budget.amount,
+      name: budget.name || "",
+      analyticalAccountId: accountId || "",
+      period_startDate: budget.period_startDate || "",
+      period_endDate: budget.period_endDate || "",
+      amount: budget.amount || 0,
     });
     setIsModalOpen(true);
   };
 
   const handleSave = () => {
-    if (selectedBudget) {
-      setBudgets(
-        budgets.map((b) =>
-          b.id === selectedBudget.id ? { ...selectedBudget, ...formData } : b,
-        ),
-      );
-    } else {
-      setBudgets([
-        ...budgets,
-        {
-          id: Math.max(...budgets.map((b) => b.id)) + 1,
+    try {
+      if (selectedBudget) {
+        // UPDATE
+        const updatedBudget = {
+          ...selectedBudget,
           ...formData,
+           // Keep calculated fields or reset them? In real app backend does this.
+           // For static, we preserve existing spentAmount/remainingAmount unless logic changes it.
+           // Recalculate remaining just in case amount changed
+          remainingAmount: formData.amount - (selectedBudget.spentAmount || 0),
+          _id: selectedBudget._id || selectedBudget.id
+        };
+        
+        setBudgets(
+          budgets.map((b) =>
+            (b._id || b.id) === (selectedBudget._id || selectedBudget.id)
+              ? updatedBudget
+              : b
+          )
+        );
+        toast.success('Budget updated successfully');
+      } else {
+        // CREATE
+        const newBudget = {
+          ...formData,
+          _id: Date.now().toString(),
           spentAmount: 0,
-          remainingAmount: formData.amount,
-        },
-      ]);
+          remainingAmount: formData.amount
+        };
+        setBudgets([...budgets, newBudget]);
+        toast.success('Budget added successfully');
+      }
+      setIsModalOpen(false);
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to save budget');
     }
-    setIsModalOpen(false);
   };
 
-  /* ---------- JSX ---------- */
   return (
     <div className="master-page">
       <div className="master-page-header">
@@ -168,13 +196,13 @@ const Budgets = () => {
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      analyticalAccountId: Number(e.target.value),
+                      analyticalAccountId: e.target.value,
                     })
                   }
                 >
                   <option value="">Select Account</option>
                   {analyticalAccounts.map((acc) => (
-                    <option key={acc.id} value={acc.id}>
+                    <option key={acc._id || acc.id} value={acc._id || acc.id}>
                       {acc.name}
                     </option>
                   ))}

@@ -1,68 +1,46 @@
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Breadcrumbs from "../components/Breadcrumbs";
-import { Printer, CreditCard, X } from "lucide-react";
+import { Printer, CreditCard, X, ArrowLeft } from "lucide-react";
+import { mockInvoices } from "../data/mockData";
 
 const InvoiceDetail = () => {
   const { invoiceId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  // Mock invoice data - replace with API call
-  // Format invoice number as INV/YYYY/0001
-  const formatInvoiceNumber = (id) => {
-    const year = new Date().getFullYear();
-    const paddedId = String(id).padStart(4, "0");
-    return `INV/${year}/${paddedId}`;
-  };
+  const [invoice, setInvoice] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const invoice = {
-    id: invoiceId,
-    invoiceNumber: formatInvoiceNumber(invoiceId),
-    title: "Customer Invoice",
-    status: "Not Paid", // Can be: Paid, Partial, Not Paid
-    customerName: user?.name || "Customer Name",
-    reference: "REF-2025-001",
-    invoiceDate: "2025-01-15",
-    dueDate: "2025-02-15",
-    lineItems: [
-      {
-        srNo: 1,
-        product: "Office Chair - Premium Model",
-        budgetAnalytics: "Furniture - Office",
-        quantity: 2,
-        unitPrice: 3500.0,
-        total: 7000.0,
-      },
-      {
-        srNo: 2,
-        product: "Desk - Executive Series",
-        budgetAnalytics: "Furniture - Office",
-        quantity: 1,
-        unitPrice: 5500.0,
-        total: 5500.0,
-      },
-      {
-        srNo: 3,
-        product: "Conference Table",
-        budgetAnalytics: "Furniture - Meeting",
-        quantity: 1,
-        unitPrice: 12000.0,
-        total: 12000.0,
-      },
-    ],
-    payments: {
-      cash: 5000.0,
-      bank: 7500.0,
-    },
-  };
+  useEffect(() => {
+    // Find invoice from mock data and create a local copy
+    const found = mockInvoices.find((i) => i.id === invoiceId);
+    if (found) {
+      // Create a copy to avoid mutating original mockData
+      setInvoice({ ...found });
+    }
+    setLoading(false);
+  }, [invoiceId]);
 
-  // Calculate totals
-  const grandTotal = invoice.lineItems.reduce(
-    (sum, item) => sum + item.total,
-    0,
-  );
-  const totalPaid = invoice.payments.cash + invoice.payments.bank;
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (!invoice)
+    return (
+      <div className="p-8 text-center">
+        <h2 className="text-xl font-bold text-gray-800">Invoice not found</h2>
+        <button
+          onClick={() => navigate("/invoices")}
+          className="mt-4 text-blue-600 underline"
+        >
+          Back to Invoices
+        </button>
+      </div>
+    );
+
+  // Calculate totals from local invoice state
+  const grandTotal = invoice.amount;
+  const totalPaid =
+    (invoice.payments?.bank || 0) + (invoice.payments?.cash || 0);
   const amountDue = grandTotal - totalPaid;
 
   const handlePrint = () => {
@@ -72,14 +50,6 @@ const InvoiceDetail = () => {
   const handlePay = () => {
     navigate(`/invoices/${invoiceId}/pay`);
   };
-
-  // Get invoice status from localStorage (updated after payment)
-  const getInvoiceStatus = () => {
-    const savedStatus = localStorage.getItem(`invoice_${invoiceId}_status`);
-    return savedStatus || invoice.status;
-  };
-
-  const currentStatus = getInvoiceStatus();
 
   const getStatusBadge = (status) => {
     const statusConfig = {
@@ -95,6 +65,14 @@ const InvoiceDetail = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Breadcrumbs />
 
+        <button
+          onClick={() => navigate("/invoices")}
+          className="flex items-center text-gray-600 hover:text-gray-900 mb-6"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Invoices
+        </button>
+
         {/* Main Container */}
         <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
           {/* Header Section */}
@@ -102,7 +80,7 @@ const InvoiceDetail = () => {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 mb-1">
-                  {invoice.title}
+                  {invoice.title || "Customer Invoice"}
                 </h1>
                 <p className="text-gray-600 text-sm font-medium">
                   Invoice Number:{" "}
@@ -113,9 +91,9 @@ const InvoiceDetail = () => {
               </div>
               <div className="flex items-center gap-3">
                 <span
-                  className={`inline-flex px-4 py-2 rounded-full text-sm font-bold ${getStatusBadge(currentStatus)}`}
+                  className={`inline-flex px-4 py-2 rounded-full text-sm font-bold ${getStatusBadge(invoice.status)}`}
                 >
-                  {currentStatus}
+                  {invoice.status}
                 </span>
               </div>
             </div>
@@ -130,7 +108,7 @@ const InvoiceDetail = () => {
               <Printer className="w-4 h-4 mr-2" />
               Print
             </button>
-            {currentStatus !== "Paid" && (
+            {invoice.status !== "Paid" && (
               <button
                 onClick={handlePay}
                 className="btn-primary flex items-center text-sm"
@@ -139,13 +117,6 @@ const InvoiceDetail = () => {
                 Pay
               </button>
             )}
-            <button
-              disabled
-              className="flex items-center px-4 py-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed text-sm font-medium"
-            >
-              <X className="w-4 h-4 mr-2" />
-              Cancel
-            </button>
           </div>
 
           {/* Content Section */}
@@ -162,15 +133,7 @@ const InvoiceDetail = () => {
                       Customer Name
                     </span>
                     <p className="text-gray-900 font-semibold text-base">
-                      {invoice.customerName}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-xs font-medium text-gray-500 block mb-1">
-                      Reference
-                    </span>
-                    <p className="text-gray-900 font-semibold text-base">
-                      {invoice.reference}
+                      {user?.name || "Customer"}
                     </p>
                   </div>
                 </div>
@@ -185,14 +148,11 @@ const InvoiceDetail = () => {
                       Invoice Date
                     </span>
                     <p className="text-gray-900 font-semibold text-base">
-                      {new Date(invoice.invoiceDate).toLocaleDateString(
-                        "en-US",
-                        {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        },
-                      )}
+                      {new Date(invoice.date).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
                     </p>
                   </div>
                   <div>
@@ -226,9 +186,6 @@ const InvoiceDetail = () => {
                       <th className="px-5 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                         Product
                       </th>
-                      <th className="px-5 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                        Budget Analytics
-                      </th>
                       <th className="px-5 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
                         Quantity
                       </th>
@@ -241,7 +198,7 @@ const InvoiceDetail = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {invoice.lineItems.map((item) => (
+                    {invoice.lineItems?.map((item) => (
                       <tr
                         key={item.srNo}
                         className="hover:bg-blue-50/50 transition-colors"
@@ -251,9 +208,6 @@ const InvoiceDetail = () => {
                         </td>
                         <td className="px-5 py-4 text-sm text-gray-900 font-semibold">
                           {item.product}
-                        </td>
-                        <td className="px-5 py-4 text-sm text-gray-600">
-                          {item.budgetAnalytics}
                         </td>
                         <td className="px-5 py-4 whitespace-nowrap text-sm font-medium text-gray-700 text-center">
                           {item.quantity}
@@ -276,7 +230,7 @@ const InvoiceDetail = () => {
                   <tfoot className="bg-gradient-to-r from-blue-50 to-indigo-50 border-t-2 border-blue-200">
                     <tr>
                       <td
-                        colSpan="5"
+                        colSpan="4"
                         className="px-5 py-4 text-right text-base font-bold text-gray-700"
                       >
                         Grand Total
@@ -293,7 +247,7 @@ const InvoiceDetail = () => {
               </div>
             </div>
 
-            {/* Payment Summary - Bottom Right */}
+            {/* Payment Summary */}
             <div className="flex justify-end">
               <div className="w-full md:w-96">
                 <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border-2 border-gray-200 shadow-sm">
@@ -301,37 +255,26 @@ const InvoiceDetail = () => {
                     Payment Summary
                   </h3>
                   <div className="space-y-4">
+                    {/* Simplified payment breakdown */}
                     <div className="flex justify-between items-center py-2">
                       <span className="text-sm font-medium text-gray-600">
-                        Paid via Cash
+                        Total Paid
                       </span>
                       <span className="text-base font-bold text-gray-900">
                         ₹
-                        {invoice.payments.cash.toLocaleString("en-IN", {
+                        {totalPaid.toLocaleString("en-IN", {
                           minimumFractionDigits: 2,
                         })}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center py-2">
-                      <span className="text-sm font-medium text-gray-600">
-                        Paid via Bank
-                      </span>
-                      <span className="text-base font-bold text-gray-900">
-                        ₹
-                        {invoice.payments.bank.toLocaleString("en-IN", {
-                          minimumFractionDigits: 2,
-                        })}
-                      </span>
-                    </div>
+
                     <div className="pt-4 border-t-2 border-gray-300">
                       <div className="flex justify-between items-center">
                         <span className="text-base font-bold text-gray-800">
                           Amount Due
                         </span>
                         <span
-                          className={`text-2xl font-extrabold ${
-                            amountDue > 0 ? "text-red-600" : "text-green-600"
-                          }`}
+                          className={`text-2xl font-extrabold ${amountDue > 0 ? "text-red-600" : "text-green-600"}`}
                         >
                           ₹
                           {amountDue.toLocaleString("en-IN", {

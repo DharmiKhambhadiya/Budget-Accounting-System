@@ -1,49 +1,71 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
-import { userLoginApi } from "../utils/API/authapi";
+
+const STATIC_USERS = [
+  {
+    id: 1,
+    name: "Demo User",
+    loginId: "user01",
+    password: "123456",
+    role: "user",
+  },
+  {
+    id: 2,
+    name: "Finance Admin",
+    loginId: "finance01",
+    password: "123456",
+    role: "admin",
+  },
+];
 
 const Login = () => {
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
   const navigate = useNavigate();
 
-  // Redirect if already logged in
+  /* ======================
+     AUTO LOGIN CHECK
+  ====================== */
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
+    if (localStorage.getItem("isAuthenticated") === "true") {
       navigate("/");
     }
   }, [navigate]);
 
-  const handleSubmit = async (e) => {
+  /* ======================
+     LOGIN HANDLER
+  ====================== */
+  const handleSubmit = (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      const res = await userLoginApi({ loginId, password });
+      const storedUsers =
+        JSON.parse(localStorage.getItem("users")) || STATIC_USERS;
 
-      if (!res.data?.success) {
-        throw new Error(res.data?.message || "Login failed");
+      const user = storedUsers.find(
+        (u) => u.loginId === loginId && u.password === password
+      );
+
+      if (!user) {
+        setError("Invalid Login ID or Password");
+        toast.error("Invalid Login ID or Password");
+        return;
       }
 
-      const { token, ...user } = res.data.data;
-
-      localStorage.setItem("token", token);
       localStorage.setItem("currentUser", JSON.stringify(user));
       localStorage.setItem("isAuthenticated", "true");
 
       toast.success("Logged in successfully");
       navigate("/");
     } catch (err) {
-      const message =
-        err.response?.data?.message || err.message || "Something went wrong";
-
-      setError(message);
-      toast.error(message);
+      console.warn("Login error:", err);
+      toast.error("Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -62,34 +84,23 @@ const Login = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Login ID
-            </label>
-            <input
-              type="text"
-              className="input-field"
-              value={loginId}
-              onChange={(e) => setLoginId(e.target.value)}
-              placeholder="Enter your login ID"
-              required
-              autoFocus
-            />
-          </div>
+          <input
+            type="text"
+            className="input-field"
+            placeholder="Login ID"
+            value={loginId}
+            onChange={(e) => setLoginId(e.target.value)}
+            required
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Password
-            </label>
-            <input
-              type="password"
-              className="input-field"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-              required
-            />
-          </div>
+          <input
+            type="password"
+            className="input-field"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
 
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm text-center">
@@ -100,27 +111,21 @@ const Login = () => {
           <button
             type="submit"
             disabled={loading}
-            className="btn-primary w-full py-3 text-base font-semibold disabled:opacity-60"
+            className="btn-primary w-full py-3"
           >
             {loading ? "Signing In..." : "Sign In"}
           </button>
         </form>
 
-        <div className="mt-8 pt-6 border-t border-gray-200 text-center">
-          <p className="text-xs text-gray-600 mb-4">
-            <strong className="text-gray-900">Demo Accounts:</strong>
-          </p>
-          <ul className="text-xs text-gray-600 space-y-1 font-mono mb-6">
-            <li>user01 / 123456</li>
-            <li>finance01 / 123456</li>
-          </ul>
-          <p className="text-xs text-gray-600">
-            Don't have an account?{" "}
-            <Link
-              to="/signup"
-              className="text-blue-600 font-semibold hover:text-blue-700"
-            >
-              Create one here
+        <div className="mt-8 text-center text-xs">
+          <p className="font-semibold">Demo Accounts</p>
+          <p>user01 / 123456</p>
+          <p>finance01 / 123456</p>
+
+          <p className="mt-4">
+            Don’t have an account?{" "}
+            <Link to="/signup" className="text-blue-600 font-semibold">
+              Create one
             </Link>
           </p>
         </div>

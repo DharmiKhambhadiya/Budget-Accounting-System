@@ -1,16 +1,23 @@
 import { useState } from 'react';
+import { toast } from 'react-toastify';
 import DataTable from '../../components/DataTable';
 import FormModal from '../../components/FormModal';
-import { getAutoAnalyticalModels, getAnalyticalAccounts, getContacts, getProducts } from '../../utils/dataLoader';
+import { 
+  mockAutoAnalyticalModels,
+  mockAnalyticalAccounts,
+  mockContacts,
+  mockProducts
+} from '../../data/mockData';
 import './MasterPage.css';
 
 const AutoAnalyticalModels = () => {
-  const [models, setModels] = useState(getAutoAnalyticalModels());
-  const analyticalAccounts = getAnalyticalAccounts();
-  const contacts = getContacts();
-  const products = getProducts();
+  const [models, setModels] = useState(mockAutoAnalyticalModels || []);
+  const [analyticalAccounts] = useState(mockAnalyticalAccounts || []);
+  const [contacts] = useState(mockContacts || []);
+  const [products] = useState(mockProducts || []);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedModel, setSelectedModel] = useState(null);
+  
   const [formData, setFormData] = useState({
     ruleType: 'Keyword Based',
     conditions: {
@@ -24,19 +31,22 @@ const AutoAnalyticalModels = () => {
   });
 
   const getAccountName = (id) => {
-    const account = analyticalAccounts.find(a => a.id === id);
+    const accountId = id?._id || id;
+    const account = analyticalAccounts.find(a => (a._id || a.id) === accountId);
     return account ? account.name : '-';
   };
 
   const formatConditions = (conditions) => {
     const parts = [];
     if (conditions.vendorId) {
-      const vendor = contacts.find(c => c.id === conditions.vendorId);
-      parts.push(`Vendor: ${vendor?.name || conditions.vendorId}`);
+      const vendorId = conditions.vendorId?._id || conditions.vendorId;
+      const vendor = contacts.find(c => (c._id || c.id) === vendorId);
+      parts.push(`Vendor: ${vendor?.name || vendorId}`);
     }
     if (conditions.productId) {
-      const product = products.find(p => p.id === conditions.productId);
-      parts.push(`Product: ${product?.name || conditions.productId}`);
+      const productId = conditions.productId?._id || conditions.productId;
+      const product = products.find(p => (p._id || p.id) === productId);
+      parts.push(`Product: ${product?.name || productId}`);
     }
     if (conditions.minAmount) {
       parts.push(`Min Amount: ₹${conditions.minAmount}`);
@@ -45,7 +55,8 @@ const AutoAnalyticalModels = () => {
       const keywords = Array.isArray(conditions.keywords) 
         ? conditions.keywords.join(', ') 
         : conditions.keywords;
-      parts.push(`Keywords: ${keywords}`);
+      // Only push if not empty
+      if (keywords && keywords.length > 0) parts.push(`Keywords: ${keywords}`);
     }
     return parts.length > 0 ? parts.join(' | ') : 'No conditions';
   };
@@ -62,7 +73,10 @@ const AutoAnalyticalModels = () => {
       key: 'analyticalAccountId',
       header: 'Analytical Account',
       width: '25%',
-      render: (row) => getAccountName(row.analyticalAccountId)
+      render: (row) => {
+        const accountId = row.analyticalAccountId?._id || row.analyticalAccountId;
+        return getAccountName(accountId);
+      }
     },
     { key: 'priority', header: 'Priority', width: '15%' }
   ];
@@ -85,45 +99,65 @@ const AutoAnalyticalModels = () => {
 
   const handleEdit = (model) => {
     setSelectedModel(model);
+    const vendorId = model.conditions?.vendorId?._id || model.conditions?.vendorId || '';
+    const productId = model.conditions?.productId?._id || model.conditions?.productId || '';
+    const accountId = model.analyticalAccountId?._id || model.analyticalAccountId || '';
     setFormData({
-      ruleType: model.ruleType,
+      ruleType: model.ruleType || 'Keyword Based',
       conditions: {
-        vendorId: model.conditions.vendorId || '',
-        productId: model.conditions.productId || '',
-        minAmount: model.conditions.minAmount || '',
-        keywords: Array.isArray(model.conditions.keywords) 
+        vendorId: vendorId,
+        productId: productId,
+        minAmount: model.conditions?.minAmount || '',
+        keywords: Array.isArray(model.conditions?.keywords) 
           ? model.conditions.keywords.join(', ')
-          : model.conditions.keywords || ''
+          : model.conditions?.keywords || ''
       },
-      analyticalAccountId: model.analyticalAccountId,
-      priority: model.priority
+      analyticalAccountId: accountId,
+      priority: model.priority || 1
     });
     setIsModalOpen(true);
   };
 
   const handleSave = () => {
-    const conditions = {
-      ...formData.conditions,
-      keywords: formData.conditions.keywords 
-        ? formData.conditions.keywords.split(',').map(k => k.trim())
-        : []
-    };
-    
-    if (selectedModel) {
-      setModels(models.map(m =>
-        m.id === selectedModel.id 
-          ? { ...selectedModel, ...formData, conditions } 
-          : m
-      ));
-    } else {
-      const newModel = {
-        id: Math.max(...models.map(m => m.id)) + 1,
+    try {
+      const conditions = {
+        ...formData.conditions,
+        keywords: formData.conditions.keywords && typeof formData.conditions.keywords === 'string'
+          ? formData.conditions.keywords.split(',').map(k => k.trim()).filter(Boolean)
+          : formData.conditions.keywords || []
+      };
+      
+      const payload = {
         ...formData,
         conditions
       };
-      setModels([...models, newModel]);
+      
+      if (selectedModel) {
+        // Update
+        const updatedModel = {
+            ...selectedModel,
+            ...payload,
+            _id: selectedModel._id || selectedModel.id
+        };
+        setModels(models.map(m =>
+          (m._id || m.id) === (selectedModel._id || selectedModel.id)
+            ? updatedModel
+            : m
+        ));
+        toast.success('Auto analytical model updated successfully');
+      } else {
+        // Create
+        const newModel = {
+            ...payload,
+            _id: Date.now().toString()
+        };
+        setModels([...models, newModel]);
+        toast.success('Auto analytical model added successfully');
+      }
+      setIsModalOpen(false);
+    } catch (err) {
+      toast.error('Failed to save model');
     }
-    setIsModalOpen(false);
   };
 
   return (
@@ -178,11 +212,11 @@ const AutoAnalyticalModels = () => {
           <select
             className="form-select"
             value={formData.analyticalAccountId}
-            onChange={(e) => setFormData({ ...formData, analyticalAccountId: parseInt(e.target.value) })}
+            onChange={(e) => setFormData({ ...formData, analyticalAccountId: e.target.value })}
           >
             <option value="">Select Account</option>
             {analyticalAccounts.map(acc => (
-              <option key={acc.id} value={acc.id}>{acc.name}</option>
+              <option key={acc._id || acc.id} value={acc._id || acc.id}>{acc.name}</option>
             ))}
           </select>
         </div>
@@ -203,12 +237,12 @@ const AutoAnalyticalModels = () => {
             value={formData.conditions.vendorId}
             onChange={(e) => setFormData({
               ...formData,
-              conditions: { ...formData.conditions, vendorId: e.target.value ? parseInt(e.target.value) : '' }
+              conditions: { ...formData.conditions, vendorId: e.target.value || '' }
             })}
           >
             <option value="">Select Vendor</option>
             {contacts.filter(c => c.contactType === 'Vendor').map(vendor => (
-              <option key={vendor.id} value={vendor.id}>{vendor.name}</option>
+              <option key={vendor._id || vendor.id} value={vendor._id || vendor.id}>{vendor.name}</option>
             ))}
           </select>
         </div>
@@ -219,12 +253,12 @@ const AutoAnalyticalModels = () => {
             value={formData.conditions.productId}
             onChange={(e) => setFormData({
               ...formData,
-              conditions: { ...formData.conditions, productId: e.target.value ? parseInt(e.target.value) : '' }
+              conditions: { ...formData.conditions, productId: e.target.value || '' }
             })}
           >
             <option value="">Select Product</option>
             {products.map(product => (
-              <option key={product.id} value={product.id}>{product.name}</option>
+              <option key={product._id || product.id} value={product._id || product.id}>{product.name}</option>
             ))}
           </select>
         </div>

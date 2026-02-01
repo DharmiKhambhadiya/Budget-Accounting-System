@@ -1,72 +1,58 @@
 import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 import DataTable from "../../components/DataTable";
 import FormModal from "../../components/FormModal";
 import StatusBadge from "../../components/StatusBadge";
-import {
-  getCustomerInvoices,
-  getContacts,
-  getSalesOrders,
-  getAnalyticalAccounts,
-  formatCurrency,
-  formatDate,
-} from "../../utils/dataLoader";
+import { mockCustomerInvoices, mockContacts } from "../../data/mockData"; // Ensure mockCustomerInvoices is exported
+import { formatCurrency, formatDate } from "../../utils/formatters";
 import "./TransactionPage.css";
 
 const emptyInvoice = {
   invoiceNumber: "",
   customerId: "",
-  salesOrderId: "",
   invoiceDate: "",
   dueDate: "",
-  analyticalAccountId: "",
   status: "Unpaid",
   totalAmount: 0,
-  paidAmount: 0,
   remainingAmount: 0,
 };
 
 const CustomerInvoices = () => {
-  const [invoices, setInvoices] = useState(getCustomerInvoices());
-  const contacts = getContacts();
-  const salesOrders = getSalesOrders();
-  const accounts = getAnalyticalAccounts();
-
+  const [invoices, setInvoices] = useState(mockCustomerInvoices || []);
+  const [contacts] = useState(mockContacts);
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [mode, setMode] = useState("list"); // create | view | edit
+  const [mode, setMode] = useState("list");
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [formData, setFormData] = useState(emptyInvoice);
 
   /* ---------- HELPERS ---------- */
-  const customerName = (id) => contacts.find((c) => c.id === id)?.name || "-";
-
-  const soNumber = (id) =>
-    salesOrders.find((s) => s.id === id)?.orderNumber || "-";
-
-  const accountName = (id) => accounts.find((a) => a.id === id)?.name || "-";
+  const customerName = (id) => {
+    const customerId = id?._id || id;
+    const customer = contacts.find((c) => (c._id || c.id) === customerId);
+    return customer ? customer.name : "-";
+  };
 
   /* ---------- TABLE ---------- */
   const columns = [
-    { key: "invoiceNumber", header: "Invoice #", width: "12%" },
+    { key: "invoiceNumber", header: "Invoice #", width: "15%" },
     {
       key: "customerId",
       header: "Customer",
-      render: (r) => customerName(r.customerId),
-      width: "18%",
+      render: (r) => {
+        const id = r.customerId?._id || r.customerId;
+        return customerName(id);
+      },
+      width: "20%",
     },
-    {
-      key: "salesOrderId",
-      header: "SO #",
-      render: (r) => soNumber(r.salesOrderId),
-      width: "12%",
-    },
-    { key: "invoiceDate", header: "Invoice Date", type: "date", width: "12%" },
-    { key: "dueDate", header: "Due Date", type: "date", width: "12%" },
-    { key: "totalAmount", header: "Total", type: "currency", width: "12%" },
+    { key: "invoiceDate", header: "Date", type: "date", width: "15%" },
+    { key: "dueDate", header: "Due Date", type: "date", width: "15%" },
+    { key: "totalAmount", header: "Total", type: "currency", width: "15%" },
     {
       key: "remainingAmount",
       header: "Remaining",
       type: "currency",
-      width: "12%",
+      width: "15%",
     },
     {
       key: "status",
@@ -80,7 +66,13 @@ const CustomerInvoices = () => {
   /* ---------- EFFECT ---------- */
   useEffect(() => {
     if (mode === "view" || mode === "edit") {
-      setFormData(selectedInvoice);
+      if (selectedInvoice) {
+        const customerId = selectedInvoice.customerId?._id || selectedInvoice.customerId;
+        setFormData({
+          ...selectedInvoice,
+          customerId: customerId || ""
+        });
+      }
     } else {
       setFormData(emptyInvoice);
     }
@@ -105,30 +97,49 @@ const CustomerInvoices = () => {
   };
 
   const createInvoice = () => {
-    setInvoices([
-      ...invoices,
-      {
+    try {
+      const newInvoice = {
         ...formData,
-        id: Math.max(...invoices.map((i) => i.id)) + 1,
-        remainingAmount: formData.totalAmount - formData.paidAmount,
-      },
-    ]);
-    closeModal();
+        remainingAmount: formData.totalAmount, // Default remaining = total
+        _id: Date.now().toString()
+      };
+      setInvoices([...invoices, newInvoice]);
+      toast.success('Invoice created successfully');
+      closeModal();
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to create invoice');
+    }
   };
 
   const updateInvoice = () => {
-    setInvoices(
-      invoices.map((i) =>
-        i.id === formData.id
-          ? {
-              ...formData,
-              remainingAmount: formData.totalAmount - formData.paidAmount,
-            }
-          : i,
-      ),
-    );
-    closeModal();
+    try {
+      const updatedInvoice = {
+        ...formData,
+        _id: formData._id || formData.id
+      };
+      setInvoices(invoices.map((i) => 
+        (i._id || i.id) === (formData._id || formData.id) ? updatedInvoice : i
+      ));
+      toast.success('Invoice updated successfully');
+      closeModal();
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to update invoice');
+    }
   };
+
+  const updateStatus = (newStatus) => {
+      let updated = { ...formData, status: newStatus };
+      if (newStatus === "Paid") {
+          updated.remainingAmount = 0;
+      }
+      setInvoices(invoices.map(i => 
+        (i._id || i.id) === (formData._id || formData.id) ? updated : i
+      ));
+      setFormData(updated);
+      toast.success(`Status updated to ${newStatus}`);
+  }
 
   /* ---------- FORM ---------- */
   const renderForm = () => (
@@ -148,30 +159,13 @@ const CustomerInvoices = () => {
         <select
           value={formData.customerId}
           onChange={(e) =>
-            setFormData({ ...formData, customerId: Number(e.target.value) })
+            setFormData({ ...formData, customerId: e.target.value })
           }
         >
           <option value="">Select Customer</option>
-          {contacts.map((c) => (
-            <option key={c.id} value={c.id}>
+          {contacts.filter(c => c.contactType === 'Customer').map((c) => (
+            <option key={c._id || c.id} value={c._id || c.id}>
               {c.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="form-group">
-        <label>Sales Order</label>
-        <select
-          value={formData.salesOrderId}
-          onChange={(e) =>
-            setFormData({ ...formData, salesOrderId: Number(e.target.value) })
-          }
-        >
-          <option value="">Select SO</option>
-          {salesOrders.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.orderNumber}
             </option>
           ))}
         </select>
@@ -199,7 +193,7 @@ const CustomerInvoices = () => {
         />
       </div>
 
-      <div className="form-group">
+      <div className="form-group full-width">
         <label>Total Amount</label>
         <input
           type="number"
@@ -209,103 +203,52 @@ const CustomerInvoices = () => {
           }
         />
       </div>
-
-      <div className="form-group full-width">
-        <label>Analytical Account</label>
-        <select
-          value={formData.analyticalAccountId}
-          onChange={(e) =>
-            setFormData({
-              ...formData,
-              analyticalAccountId: Number(e.target.value),
-            })
-          }
-        >
-          <option value="">Select Account</option>
-          {accounts.map((a) => (
-            <option key={a.id} value={a.id}>
-              {a.name}
-            </option>
-          ))}
-        </select>
-      </div>
     </div>
   );
 
   /* ---------- VIEW ---------- */
-  const renderView = () => {
-    const percentage =
-      formData.totalAmount > 0
-        ? ((formData.paidAmount / formData.totalAmount) * 100).toFixed(1)
-        : 0;
+  const renderView = () => (
+    <div className="po-view">
+      <div className="po-view-header">
+        <h3>{formData.invoiceNumber}</h3>
+        <StatusBadge status={formData.status} type="payment" />
+      </div>
 
-    return (
-      <div className="po-view">
-        <div className="po-view-header">
-          <h3>{formData.invoiceNumber}</h3>
-          <StatusBadge status={formData.status} type="payment" />
+      <div className="po-view-grid">
+        <p>
+          <strong>Customer:</strong> {customerName(formData.customerId)}
+        </p>
+        <p>
+          <strong>Date:</strong> {formatDate(formData.invoiceDate)}
+        </p>
+        <p>
+          <strong>Due Date:</strong> {formatDate(formData.dueDate)}
+        </p>
+      </div>
+
+      <div className="po-summary">
+        <div className="total">
+          <span>Total</span>
+          <span>{formatCurrency(formData.totalAmount)}</span>
         </div>
-
-        <div className="po-view-grid">
-          <p>
-            <strong>Customer:</strong> {customerName(formData.customerId)}
-          </p>
-          <p>
-            <strong>Sales Order:</strong> {soNumber(formData.salesOrderId)}
-          </p>
-          <p>
-            <strong>Invoice Date:</strong> {formatDate(formData.invoiceDate)}
-          </p>
-          <p>
-            <strong>Due Date:</strong> {formatDate(formData.dueDate)}
-          </p>
-          <p>
-            <strong>Account:</strong>{" "}
-            {accountName(formData.analyticalAccountId)}
-          </p>
-        </div>
-
-        <div className="po-summary">
-          <div>
-            <span>Total</span>
-            <span>{formatCurrency(formData.totalAmount)}</span>
-          </div>
-          <div>
-            <span>Paid</span>
-            <span>{formatCurrency(formData.paidAmount)}</span>
-          </div>
-          <div className="total">
-            <span>Remaining</span>
-            <span>{formatCurrency(formData.remainingAmount)}</span>
-          </div>
-
-          <div className="payment-progress">
-            <div className="payment-progress-bar">
-              <div
-                className="payment-progress-fill"
-                style={{ width: `${percentage}%` }}
-              />
-            </div>
-            <span>{percentage}% Paid</span>
-          </div>
+        <div className="total">
+          <span>Remaining</span>
+          <span>{formatCurrency(formData.remainingAmount)}</span>
         </div>
       </div>
-    );
-  };
+    </div>
+  );
 
-  /* ---------- JSX ---------- */
   return (
     <div className="transaction-page">
       <div className="transaction-page-header">
         <div>
-          <h1 className="transaction-page-title">Customer Invoices</h1>
-          <p className="transaction-page-subtitle">
-            Manage customer invoices and incoming payments
-          </p>
+          <h1>Customer Invoices</h1>
+          <p>Manage outgoing invoices</p>
         </div>
 
         <button className="btn btn-primary" onClick={openCreate}>
-          + New Customer Invoice
+          + New Invoice
         </button>
       </div>
 
@@ -314,11 +257,11 @@ const CustomerInvoices = () => {
       <FormModal
         isOpen={isModalOpen}
         onClose={closeModal}
-        size="large"
+        size="medium" // Smaller than PO modal
         title={
           mode === "create"
-            ? "New Customer Invoice"
-            : `Customer Invoice: ${formData.invoiceNumber}`
+            ? "New Invoice"
+            : `Invoice: ${formData.invoiceNumber}`
         }
       >
         <div className="po-modal">
@@ -330,23 +273,9 @@ const CustomerInvoices = () => {
           <div className="po-modal-footer">
             {mode === "view" && (
               <>
-                <button
-                  className="btn btn-warning"
-                  onClick={() =>
-                    setFormData({ ...formData, status: "Partially Paid" })
-                  }
-                >
-                  Mark Partial
-                </button>
-                <button
+                 <button
                   className="btn btn-success"
-                  onClick={() =>
-                    setFormData({
-                      ...formData,
-                      status: "Paid",
-                      paidAmount: formData.totalAmount,
-                    })
-                  }
+                  onClick={() => updateStatus("Paid")}
                 >
                   Mark Paid
                 </button>

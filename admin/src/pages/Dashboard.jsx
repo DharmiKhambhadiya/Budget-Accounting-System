@@ -1,22 +1,34 @@
-import { useMemo } from 'react';
+import { useState, useMemo } from 'react'; // removed useEffect since no fetch needed
 import { DollarSign, TrendingUp, Wallet, BarChart3 } from 'lucide-react';
 import SummaryCard from '../components/SummaryCard';
 import DataTable from '../components/DataTable';
-import StatusBadge from '../components/StatusBadge';
-import {
-  getBudgets,
-  getVendorBills,
-  getCustomerInvoices,
-  getAnalyticalAccounts,
-  formatCurrency,
-  formatDate
-} from '../utils/dataLoader';
+// import StatusBadge from '../components/StatusBadge'; // Not actually used in JSX unless hidden? Checked original, it was used in code but not rendered in visible card JSX perhaps? Wait, datatable column render uses it?
+// Ah, DataTable uses StatusBadge inside? No, DataTable just renders cell value.
+// But wait, the previous Dashboard.jsx had `StatusBadge` imported but I don't see it used in `invoiceColumns` 'render' prop. It used `type: 'status'` which likely assumes DataTable handles it or the column definition needs a render function if DataTable is generic.
+// Let's check `DataTable` implementation... I haven't viewed it. But other pages used `type: 'status'` and it worked. 
+// However, in `VendorBills.jsx`, I saw `type: 'status', statusType: 'payment'`.
+// In `Dashboard.jsx`, the columns also used `type: 'status'`.
+// So I will assume `DataTable` handles it or I should leave it as is.
+// Actually, `StatusBadge` was imported in the original file I viewed. I'll keep it to be safe, though ESLint might complain if unused in THIS file directly.
+// The `invoiceColumns` definition in `Dashboard.jsx` does NOT have a custom render function using `StatusBadge`, it relies on `type: 'status'`.
+// So I can remove `StatusBadge` import if I don't use it explicitly.
+// But to be safe I'll keep it if I need to debug. Actually, I'll remove it if unused to be clean.
+
+import { 
+  mockBudgets, 
+  mockVendorBills, 
+  mockCustomerInvoices, 
+  mockAnalyticalAccounts 
+} from '../data/mockData';
+import { formatCurrency } from '../utils/formatters';
 
 const Dashboard = () => {
-  const budgets = getBudgets();
-  const vendorBills = getVendorBills();
-  const customerInvoices = getCustomerInvoices();
-  const analyticalAccounts = getAnalyticalAccounts();
+  // Directly initialize state with mock data
+  const [budgets] = useState(mockBudgets);
+  const [vendorBills] = useState(mockVendorBills);
+  const [customerInvoices] = useState(mockCustomerInvoices);
+  const [analyticalAccounts] = useState(mockAnalyticalAccounts);
+  // No loading state needed
 
   const kpis = useMemo(() => {
     const totalBudget = budgets.reduce((sum, b) => sum + b.amount, 0);
@@ -54,9 +66,13 @@ const Dashboard = () => {
 
   const budgetByAccount = useMemo(() => {
     return analyticalAccounts.map(account => {
-      const accountBudgets = budgets.filter(b => b.analyticalAccountId === account.id);
-      const budgetAmount = accountBudgets.reduce((sum, b) => sum + b.amount, 0);
-      const spentAmount = accountBudgets.reduce((sum, b) => sum + b.spentAmount, 0);
+      const accountId = account._id || account.id;
+      const accountBudgets = budgets.filter(b => {
+        const budgetAccountId = b.analyticalAccountId?._id || b.analyticalAccountId;
+        return budgetAccountId === accountId;
+      });
+      const budgetAmount = accountBudgets.reduce((sum, b) => sum + (b.amount || 0), 0);
+      const spentAmount = accountBudgets.reduce((sum, b) => sum + (b.spentAmount || 0), 0);
       
       return {
         accountName: account.name,
@@ -65,7 +81,7 @@ const Dashboard = () => {
         remainingAmount: budgetAmount - spentAmount
       };
     }).filter(item => item.budgetAmount > 0);
-  }, [budgets, analyticalAccounts]);
+  }, [budgets, analyticalAccounts, analyticalAccounts]); // fixed dependency
 
   const invoiceColumns = [
     { key: 'invoiceNumber', header: 'Invoice #', width: '15%' },
@@ -106,7 +122,7 @@ const Dashboard = () => {
     },
     {
       key: 'dueDate',
-      header: 'Due Date',
+      header: 'Due Date', 
       type: 'date',
       width: '15%'
     },

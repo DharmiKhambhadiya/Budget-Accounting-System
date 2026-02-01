@@ -31,25 +31,25 @@ const Sidebar = () => {
   const menuItems = [
     {
       title: 'Dashboard',
-      path: '/',
+      path: '/admin/dashboard',
       icon: LayoutDashboard
     },
     {
       title: 'Master Data',
       icon: Settings,
       children: [
-        { title: 'Users', path: '/master/users', icon: Users },
-        { title: 'Contacts', path: '/master/contacts', icon: UserCircle },
-        { title: 'Products', path: '/master/products', icon: Package },
+        { title: 'Users', path: '/admin/master/users', icon: Users },
+        { title: 'Contacts', path: '/admin/master/contacts', icon: UserCircle },
+        { title: 'Products', path: '/admin/master/products', icon: Package },
         {
           title: 'Analytical Accounts',
-          path: '/master/analytical-accounts',
+          path: '/admin/master/analytical-accounts',
           icon: Network
         },
-        { title: 'Budgets', path: '/master/budgets', icon: Wallet },
+        { title: 'Budgets', path: '/admin/master/budgets', icon: Wallet },
         {
           title: 'Auto Analytical Models',
-          path: '/master/auto-analytical-models',
+          path: '/admin/master/auto-analytical-models',
           icon: Cog
         }
       ]
@@ -60,22 +60,22 @@ const Sidebar = () => {
       children: [
         {
           title: 'Purchase Orders',
-          path: '/transactions/purchase-orders',
+          path: '/admin/transactions/purchase-orders',
           icon: Truck
         },
         {
           title: 'Sales Orders',
-          path: '/transactions/sales-orders',
+          path: '/admin/transactions/sales-orders',
           icon: Store
         },
         {
           title: 'Vendor Bills',
-          path: '/transactions/vendor-bills',
+          path: '/admin/transactions/vendor-bills',
           icon: Receipt
         },
         {
           title: 'Customer Invoices',
-          path: '/transactions/customer-invoices',
+          path: '/admin/transactions/customer-invoices',
           icon: FileText
         }
       ]
@@ -86,25 +86,28 @@ const Sidebar = () => {
       children: [
         {
           title: 'Bill Payments',
-          path: '/payments/bill-payments',
+          path: '/admin/payments/bill-payments',
           icon: CreditCard
         },
         {
           title: 'Invoice Payments',
-          path: '/payments/invoice-payments',
+          path: '/admin/payments/invoice-payments',
           icon: Wallet
         }
       ]
     },
     {
       title: 'Reports',
-      path: '/reports',
+      path: '/admin/reports',
       icon: BarChart3
     }
   ];
 
   const isActive = (path) => {
-    if (path === '/') return location.pathname === '/';
+    // Exact match for dashboard, prefix match for others
+    if (path === '/admin/dashboard') {
+      return location.pathname === '/admin/dashboard' || location.pathname === '/';
+    }
     return location.pathname.startsWith(path);
   };
 

@@ -1,12 +1,13 @@
 import { useState } from "react";
+import { toast } from "react-toastify";
 import DataTable from "../../components/DataTable";
 import FormModal from "../../components/FormModal";
 import StatusBadge from "../../components/StatusBadge";
-import { getContacts } from "../../utils/dataLoader";
+import { mockContacts } from "../../data/mockData";
 import "./MasterPage.css";
 
 const Contacts = () => {
-  const [contacts, setContacts] = useState(getContacts());
+  const [contacts, setContacts] = useState(mockContacts);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedContact, setSelectedContact] = useState(null);
   const [formData, setFormData] = useState({
@@ -95,11 +96,11 @@ const Contacts = () => {
   const handleEdit = (contact) => {
     setSelectedContact(contact);
     setFormData({
-      name: contact.name,
-      contactType: contact.contactType,
-      email: contact.email,
-      phone: contact.phone,
-      address: contact.address,
+      name: contact.name || "",
+      contactType: contact.contactType || "Customer",
+      email: contact.email || "",
+      phone: contact.phone || "",
+      address: contact.address || "",
       image: contact.image || null,
       tags: contact.tags || [],
       tagsInput: contact.tags ? contact.tags.join(", ") : "",
@@ -108,30 +109,48 @@ const Contacts = () => {
   };
 
   const handleSave = () => {
-    // parse tags input into array
-    const parsedTags = formData.tagsInput
-      ? formData.tagsInput
-          .split(",")
-          .map((t) => t.trim())
-          .filter(Boolean)
-      : formData.tags || [];
+    try {
+      // parse tags input into array
+      const parsedTags = formData.tagsInput
+        ? formData.tagsInput
+            .split(",")
+            .map((t) => t.trim())
+            .filter(Boolean)
+        : formData.tags || [];
 
-    const payload = { ...formData, tags: parsedTags };
+      const payload = { ...formData, tags: parsedTags };
+      delete payload.tagsInput; // Remove tagsInput from payload
+      // Keep image in payload if present
 
-    if (selectedContact) {
-      setContacts(
-        contacts.map((c) =>
-          c.id === selectedContact.id ? { ...c, ...payload } : c,
-        ),
-      );
-    } else {
-      const newContact = {
-        id: contacts.length ? Math.max(...contacts.map((c) => c.id)) + 1 : 1,
-        ...payload,
-      };
-      setContacts([...contacts, newContact]);
+      if (selectedContact) {
+        // UPDATE
+        const updatedContact = {
+          ...selectedContact,
+          ...payload,
+          _id: selectedContact._id || selectedContact.id
+        };
+        setContacts(
+          contacts.map((c) =>
+            (c._id || c.id) === (selectedContact._id || selectedContact.id)
+              ? updatedContact
+              : c
+          )
+        );
+        toast.success('Contact updated successfully');
+      } else {
+        // CREATE
+        const newContact = {
+          ...payload,
+          _id: Date.now().toString()
+        };
+        setContacts([...contacts, newContact]);
+        toast.success('Contact added successfully');
+      }
+      setIsModalOpen(false);
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to save contact');
     }
-    setIsModalOpen(false);
   };
 
   return (

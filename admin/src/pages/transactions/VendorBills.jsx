@@ -1,15 +1,15 @@
 import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 import DataTable from "../../components/DataTable";
 import FormModal from "../../components/FormModal";
 import StatusBadge from "../../components/StatusBadge";
-import {
-  getVendorBills,
-  getContacts,
-  getPurchaseOrders,
-  getAnalyticalAccounts,
-  formatCurrency,
-  formatDate,
-} from "../../utils/dataLoader";
+import { 
+  mockVendorBills, 
+  mockContacts, 
+  mockPurchaseOrders, 
+  mockAnalyticalAccounts 
+} from "../../data/mockData";
+import { formatCurrency, formatDate } from "../../utils/formatters";
 import "./TransactionPage.css";
 
 const emptyBill = {
@@ -26,21 +26,32 @@ const emptyBill = {
 };
 
 const VendorBills = () => {
-  const [bills, setBills] = useState(getVendorBills());
-  const contacts = getContacts();
-  const purchaseOrders = getPurchaseOrders();
-  const accounts = getAnalyticalAccounts();
-
+  const [bills, setBills] = useState(mockVendorBills);
+  const [contacts] = useState(mockContacts);
+  const [purchaseOrders] = useState(mockPurchaseOrders);
+  const [accounts] = useState(mockAnalyticalAccounts);
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [mode, setMode] = useState("list"); // create | view | edit
   const [selectedBill, setSelectedBill] = useState(null);
   const [formData, setFormData] = useState(emptyBill);
 
   /* ---------- HELPERS ---------- */
-  const vendorName = (id) => contacts.find((v) => v.id === id)?.name || "-";
-  const poNumber = (id) =>
-    purchaseOrders.find((p) => p.id === id)?.orderNumber || "-";
-  const accountName = (id) => accounts.find((a) => a.id === id)?.name || "-";
+  const vendorName = (id) => {
+    const vendorId = id?._id || id;
+    const vendor = contacts.find((v) => (v._id || v.id) === vendorId);
+    return vendor ? vendor.name : "-";
+  };
+  const poNumber = (id) => {
+    const poId = id?._id || id;
+    const po = purchaseOrders.find((p) => (p._id || p.id) === poId);
+    return po ? po.orderNumber : "-";
+  };
+  const accountName = (id) => {
+    const accountId = id?._id || id;
+    const account = accounts.find((a) => (a._id || a.id) === accountId);
+    return account ? account.name : "-";
+  };
 
   /* ---------- TABLE ---------- */
   const columns = [
@@ -48,13 +59,19 @@ const VendorBills = () => {
     {
       key: "vendorId",
       header: "Vendor",
-      render: (r) => vendorName(r.vendorId),
+      render: (r) => {
+        const vendorId = r.vendorId?._id || r.vendorId;
+        return vendorName(vendorId);
+      },
       width: "18%",
     },
     {
       key: "purchaseOrderId",
       header: "PO #",
-      render: (r) => poNumber(r.purchaseOrderId),
+      render: (r) => {
+        const poId = r.purchaseOrderId?._id || r.purchaseOrderId;
+        return poNumber(poId);
+      },
       width: "12%",
     },
     { key: "billDate", header: "Bill Date", type: "date", width: "12%" },
@@ -78,7 +95,17 @@ const VendorBills = () => {
   /* ---------- EFFECT ---------- */
   useEffect(() => {
     if (mode === "view" || mode === "edit") {
-      setFormData(selectedBill);
+      if (selectedBill) {
+        const vendorId = selectedBill.vendorId?._id || selectedBill.vendorId;
+        const poId = selectedBill.purchaseOrderId?._id || selectedBill.purchaseOrderId;
+        const accountId = selectedBill.analyticalAccountId?._id || selectedBill.analyticalAccountId;
+        setFormData({
+          ...selectedBill,
+          vendorId: vendorId || "",
+          purchaseOrderId: poId || "",
+          analyticalAccountId: accountId || ""
+        });
+      }
     } else {
       setFormData(emptyBill);
     }
@@ -103,29 +130,37 @@ const VendorBills = () => {
   };
 
   const createBill = () => {
-    setBills([
-      ...bills,
-      {
+    try {
+      const payload = {
         ...formData,
-        id: Math.max(...bills.map((b) => b.id)) + 1,
-        remainingAmount: formData.totalAmount - formData.paidAmount,
-      },
-    ]);
-    closeModal();
+        remainingAmount: formData.totalAmount - (formData.paidAmount || 0),
+        _id: Date.now().toString()
+      };
+      setBills([...bills, payload]);
+      toast.success('Vendor bill created successfully');
+      closeModal();
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to create vendor bill');
+    }
   };
 
   const updateBill = () => {
-    setBills(
-      bills.map((b) =>
-        b.id === formData.id
-          ? {
-              ...formData,
-              remainingAmount: formData.totalAmount - formData.paidAmount,
-            }
-          : b,
-      ),
-    );
-    closeModal();
+    try {
+      const payload = {
+        ...formData,
+        remainingAmount: formData.totalAmount - (formData.paidAmount || 0),
+        _id: formData._id || formData.id
+      };
+      setBills(bills.map((b) => 
+        (b._id || b.id) === (formData._id || formData.id) ? payload : b
+      ));
+      toast.success('Vendor bill updated successfully');
+      closeModal();
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to update vendor bill');
+    }
   };
 
   /* ---------- FORM ---------- */
@@ -146,12 +181,12 @@ const VendorBills = () => {
         <select
           value={formData.vendorId}
           onChange={(e) =>
-            setFormData({ ...formData, vendorId: Number(e.target.value) })
+            setFormData({ ...formData, vendorId: e.target.value }) // Keep as string for mock
           }
         >
           <option value="">Select Vendor</option>
-          {contacts.map((v) => (
-            <option key={v.id} value={v.id}>
+          {contacts.filter(c => c.contactType === 'Vendor').map((v) => (
+            <option key={v._id || v.id} value={v._id || v.id}>
               {v.name}
             </option>
           ))}
@@ -165,13 +200,13 @@ const VendorBills = () => {
           onChange={(e) =>
             setFormData({
               ...formData,
-              purchaseOrderId: Number(e.target.value),
+              purchaseOrderId: e.target.value,
             })
           }
         >
           <option value="">Select PO</option>
           {purchaseOrders.map((p) => (
-            <option key={p.id} value={p.id}>
+            <option key={p._id || p.id} value={p._id || p.id}>
               {p.orderNumber}
             </option>
           ))}
@@ -218,13 +253,13 @@ const VendorBills = () => {
           onChange={(e) =>
             setFormData({
               ...formData,
-              analyticalAccountId: Number(e.target.value),
+              analyticalAccountId: e.target.value,
             })
           }
         >
           <option value="">Select Account</option>
           {accounts.map((a) => (
-            <option key={a.id} value={a.id}>
+            <option key={a._id || a.id} value={a._id || a.id}>
               {a.name}
             </option>
           ))}
@@ -294,7 +329,6 @@ const VendorBills = () => {
     );
   };
 
-  /* ---------- JSX ---------- */
   return (
     <div className="transaction-page">
       <div className="transaction-page-header">
@@ -331,21 +365,40 @@ const VendorBills = () => {
               <>
                 <button
                   className="btn btn-warning"
-                  onClick={() =>
-                    setFormData({ ...formData, status: "Partially Paid" })
-                  }
+                  onClick={() => {
+                     // Partial payment simulation
+                     const newPaid = formData.paidAmount + (formData.remainingAmount / 2);
+                     const newRemaining = formData.totalAmount - newPaid;
+                     const newStatus = "Partially Paid";
+                     
+                     const updatedBill = {
+                         ...formData,
+                         status: newStatus,
+                         paidAmount: newPaid,
+                         remainingAmount: newRemaining
+                     };
+                     
+                     setBills(bills.map(b => (b._id || b.id) === (formData._id || formData.id) ? updatedBill : b));
+                     setFormData(updatedBill);
+                     toast.success('Marked as Partially Paid');
+                  }}
                 >
                   Mark Partial
                 </button>
                 <button
                   className="btn btn-success"
-                  onClick={() =>
-                    setFormData({
-                      ...formData,
-                      status: "Paid",
-                      paidAmount: formData.totalAmount,
-                    })
-                  }
+                  onClick={() => {
+                     // Full payment
+                     const updatedBill = {
+                       ...formData,
+                       status: "Paid",
+                       paidAmount: formData.totalAmount,
+                       remainingAmount: 0
+                     };
+                     setBills(bills.map(b => (b._id || b.id) === (formData._id || formData.id) ? updatedBill : b));
+                     setFormData(updatedBill);
+                     toast.success('Marked as Paid');
+                  }}
                 >
                   Mark Paid
                 </button>
